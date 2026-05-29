@@ -9,14 +9,13 @@ import {
 	PresenciaEstadoSchema,
 	parsearRespuesta,
 } from "@/schemas/api.schemas";
-import type { AppType } from "../../../mxwatch-api/src/index";
 
 const API_BASE = (
 	process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 ).replace(/\/+$/, "");
 const API_URL = API_BASE.replace(/\/api$/, "");
 
-const client = hc<AppType>(API_URL, {
+const client = hc(API_URL, {
 	headers: { "x-api-key": process.env.API_KEY || "" },
 }) as unknown as {
 	api: {

@@ -29,6 +29,15 @@
 /* Integración de tokens con el tema de Tailwind CSS v4 */
 @theme inline {
 	--color-accent: var(--accent);
+	--color-surface: #080c12;
+	--color-surface-alt: #05080c;
+	--color-card: #0f1520;
+	--color-input: #161d2b;
+	--color-hover: #1c2636;
+	--color-tooltip: #0a0f18;
+	--color-primary: #f0f4ff;
+	--color-secondary: #8b98b8;
+	--color-tertiary: #5e6c8b;
 	--font-sans: var(--font-inter);
 	--font-mono: var(--font-geist-mono);
 }

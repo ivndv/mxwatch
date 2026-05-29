@@ -27,7 +27,7 @@ export default function Footer() {
 	if (pathname === "/mapa") return null;
 
 	return (
-		<footer className="w-full border-t border-white/10 bg-[#080c12] mt-auto transition-colors duration-300">
+		<footer className="w-full border-t border-white/10 bg-surface mt-auto transition-colors duration-300">
 			<div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16">
 				{/* Grid principal: Branding, Navegación, Legal y Newsletter */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -44,18 +44,18 @@ export default function Footer() {
 								height={32}
 								className="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(230,57,70,0.3)] group-hover:scale-110 transition-transform"
 							/>
-							<span className="text-xl font-bold tracking-tight text-[#f0f4ff]">
+							<span className="text-xl font-bold tracking-tight text-primary">
 								mxwatch
 							</span>
 						</Link>
-						<p className="text-[#8b98b8] text-sm leading-relaxed max-w-xs">
+						<p className="text-secondary text-sm leading-relaxed max-w-xs">
 							Monitoreo independiente de seguridad en México. Visualización de
 							control territorial basada en fuentes públicas.
 						</p>
 						{/* Indicador de actividad en tiempo real */}
 						<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 w-fit">
 							<span className="h-1.5 w-1.5 rounded-full animate-pulse bg-accent shadow-[0_0_8px_var(--accent-glow)]" />
-							<span className="text-[10px] font-bold uppercase tracking-widest text-[#5e6c8b]">
+							<span className="text-[10px] font-bold uppercase tracking-widest text-tertiary">
 								Sistema Activo
 							</span>
 						</div>
@@ -63,7 +63,7 @@ export default function Footer() {
 
 					{/* Columna 2: Navegación Principal */}
 					<div className="flex flex-col gap-5">
-						<h3 className="font-bold text-[#f0f4ff] uppercase tracking-wider text-xs">
+						<h3 className="font-bold text-primary uppercase tracking-wider text-xs">
 							Plataforma
 						</h3>
 						<ul className="flex flex-col gap-3">
@@ -71,7 +71,7 @@ export default function Footer() {
 								<li key={href}>
 									<Link
 										href={href}
-										className="text-sm text-[#8b98b8] hover:text-accent transition-colors"
+										className="text-sm text-secondary hover:text-accent transition-colors"
 									>
 										{label}
 									</Link>
@@ -82,7 +82,7 @@ export default function Footer() {
 
 					{/* Columna 3: Enlaces Legales */}
 					<div className="flex flex-col gap-5">
-						<h3 className="font-bold text-[#f0f4ff] uppercase tracking-wider text-xs">
+						<h3 className="font-bold text-primary uppercase tracking-wider text-xs">
 							Legal
 						</h3>
 						<ul className="flex flex-col gap-3">
@@ -90,7 +90,7 @@ export default function Footer() {
 								<li key={href}>
 									<Link
 										href={href}
-										className="text-sm text-[#8b98b8] hover:text-accent transition-colors"
+										className="text-sm text-secondary hover:text-accent transition-colors"
 									>
 										{label}
 									</Link>
@@ -101,7 +101,7 @@ export default function Footer() {
 
 					{/* Columna 4: Suscripción al Boletín */}
 					<div className="flex flex-col gap-5">
-						<h3 className="font-bold text-[#f0f4ff] uppercase tracking-wider text-xs">
+						<h3 className="font-bold text-primary uppercase tracking-wider text-xs">
 							Boletín
 						</h3>
 						<form
@@ -111,7 +111,7 @@ export default function Footer() {
 							<input
 								type="email"
 								placeholder="Tu correo electrónico"
-								className="px-4 py-2 rounded-md border border-white/10 bg-white/5 text-[#f0f4ff] text-sm focus:outline-none focus:border-accent transition-all"
+								className="px-4 py-2 rounded-md border border-white/10 bg-white/5 text-primary text-sm focus:outline-none focus:border-accent transition-all"
 							/>
 							<button
 								type="submit"
@@ -127,16 +127,16 @@ export default function Footer() {
 				<div className="border-t border-white/10 pt-12 flex flex-col items-center gap-8">
 					{/* Créditos y Tecnologías Utilizadas */}
 					<div className="flex flex-col items-center gap-5">
-						<p className="text-sm font-medium text-[#8b98b8]">
+						<p className="text-sm font-medium text-secondary">
 							Desarrollado por{" "}
-							<span className="font-bold text-[#f0f4ff]">Sinx</span>
+							<span className="font-bold text-primary">Sinx</span>
 						</p>
 						<div className="flex flex-wrap justify-center gap-2">
 							{["Next.js", "Tailwind", "D3-geo", "TopoJSON", "Hono"].map(
 								(tech) => (
 									<span
 										key={tech}
-										className="px-3 py-1 text-xs font-medium rounded-full border border-white/10 bg-white/5 text-[#8b98b8] transition-all hover:border-accent hover:text-accent cursor-default"
+										className="px-3 py-1 text-xs font-medium rounded-full border border-white/10 bg-white/5 text-secondary transition-all hover:border-accent hover:text-accent cursor-default"
 									>
 										{tech}
 									</span>
@@ -146,9 +146,9 @@ export default function Footer() {
 					</div>
 
 					{/* Copyright Dinámico */}
-					<p className="text-xs text-[#5e6c8b] text-center">
+					<p className="text-xs text-tertiary text-center">
 						© {new Date().getFullYear()}{" "}
-						<span className="font-bold text-[#5e6c8b]/80">mxwatch</span> — Todos
+						<span className="font-bold text-tertiary/80">mxwatch</span> — Todos
 						los derechos reservados.
 					</p>
 				</div>

@@ -23,6 +23,7 @@ const geistMono = Geist_Mono({
  * Metadatos globales para SEO, OpenGraph y Twitter Cards.
  */
 export const metadata: Metadata = {
+	metadataBase: new URL("https://mxwatch.mgdc.site"),
 	title: "mxwatch — Mapa de seguridad en México",
 	description:
 		"Plataforma interactiva para visualizar el control territorial de carteles y eventos de seguridad en toda la República Mexicana.",
@@ -90,9 +91,17 @@ export default function RootLayout({
 			<body
 				className={`${inter.variable} ${geistMono.variable} antialiased flex flex-col min-h-dvh`}
 			>
+				<a
+					href="#main-content"
+					className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-card focus:text-primary focus:rounded-lg focus:border focus:border-white/10 focus:shadow-2xl"
+				>
+					Saltar al contenido principal
+				</a>
 				<Navbar />
 				{/* Contenedor principal con offset para navbar fijo */}
-				<main className="flex-1 w-full pt-[64px]">{children}</main>
+				<main id="main-content" className="flex-1 w-full pt-[64px]">
+					{children}
+				</main>
 				<Footer />
 			</body>
 		</html>

@@ -1,10 +1,19 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import MapCanvas from "@/components/MapCanvas";
 import MapSidebar from "@/components/MapSidebar";
 
-// Configuración de runtime para Cloudflare Pages.
-// 'force-dynamic' habilita Server Actions (POST) en esta ruta estática.
-// 'edge' asegura ejecución de baja latencia cerca del usuario.
+export const metadata: Metadata = {
+	title: "Mapa interactivo — mxwatch",
+	description:
+		"Visualiza el control territorial de los cárteles en cada estado de México. Datos de inteligencia actualizados a Mayo 2026.",
+	openGraph: {
+		title: "Mapa interactivo — mxwatch",
+		description:
+			"Visualiza el control territorial de los cárteles en cada estado de México.",
+	},
+};
+
 export const dynamic = "force-dynamic";
 export const runtime = "edge";
 
@@ -14,15 +23,13 @@ export const runtime = "edge";
  */
 export default function MapaPage() {
 	return (
-		<div className="flex flex-col md:flex-row h-[calc(100dvh-64px)] w-full overflow-hidden bg-[#080c12]">
-			{/* Panel lateral con fallback de carga para evitar bloqueo del renderizado */}
+		<div className="flex flex-col md:flex-row h-[calc(100dvh-64px)] w-full overflow-hidden bg-surface">
 			<Suspense
-				fallback={<div className="w-full md:w-[380px] bg-[#0f1520] shrink-0" />}
+				fallback={<div className="w-full md:w-[380px] bg-card shrink-0" />}
 			>
 				<MapSidebar />
 			</Suspense>
 
-			{/* Lienzo SVG interactivo de México */}
 			<MapCanvas />
 		</div>
 	);

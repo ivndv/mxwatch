@@ -11,12 +11,12 @@ export default function PlaceholderPage({ title }: { title: string }) {
 			</div>
 
 			{/* Título de la sección pendiente */}
-			<h1 className="text-4xl font-extrabold tracking-tight text-[#f0f4ff] mb-4">
+			<h1 className="text-4xl font-extrabold tracking-tight text-primary mb-4">
 				{title}
 			</h1>
 
 			{/* Mensaje informativo para el usuario */}
-			<p className="max-w-md text-[#8b98b8] font-medium">
+			<p className="max-w-md text-secondary font-medium">
 				Estamos trabajando en esta sección para brindarte la mejor información
 				sobre la seguridad en México. Vuelve pronto.
 			</p>

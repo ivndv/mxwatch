@@ -1,106 +1,96 @@
 "use server";
 
 import { hc } from "hono/client";
-// @ts-expect-error: Tipos inferidos desde el backend hermano (mxwatch-api) para type-safety end-to-end
+import { z } from "zod";
+import {
+	CartelBasicoSchema,
+	DetalleCartelSchema,
+	InteligenciaEstadoSchema,
+	PresenciaEstadoSchema,
+	parsearRespuesta,
+} from "@/schemas/api.schemas";
 import type { AppType } from "../../../mxwatch-api/src/index";
-import type {
-	LiveCartelDetails,
-	LiveStateIntelligence,
-	LiveStatePresence,
-} from "../types/api.types";
 
-// Configuración de la URL base de la API.
-// Se normaliza para evitar duplicidad de prefijos (/api/api) ya que el cliente Hono los maneja.
 const API_BASE = (
 	process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 ).replace(/\/+$/, "");
 const API_URL = API_BASE.replace(/\/api$/, "");
 
-// Cliente RPC de Hono con autenticación mediante API Key global.
-// biome-ignore lint/suspicious/noExplicitAny: tipos Hono RPC no resueltos en frontend
-const client: any = hc<AppType>(API_URL, {
+const client = hc<AppType>(API_URL, {
 	headers: { "x-api-key": process.env.API_KEY || "" },
-});
+}) as unknown as {
+	api: {
+		map: { $get: () => Promise<Response> };
+		cartels: { $get: () => Promise<Response> };
+		cartel: Record<
+			string,
+			{ $get: (o: { param: { slug: string } }) => Promise<Response> }
+		>;
+		state: Record<
+			string,
+			{ $get: (o: { param: { name: string } }) => Promise<Response> }
+		>;
+	};
+};
 
-/**
- * Ejecuta una promesa con un límite de tiempo para evitar bloqueos en el servidor.
- * @param promise - La operación asíncrona a ejecutar
- * @param timeoutMs - Tiempo límite en milisegundos (default: 8000ms)
- */
-async function fetchWithTimeout<T>(
+async function obtenerConTiempo<T>(
 	promise: Promise<T>,
-	timeoutMs = 8000,
+	tiempoMs = 8000,
 ): Promise<T> {
-	let timeoutId: NodeJS.Timeout;
-	const timeoutPromise = new Promise<never>((_, reject) => {
-		timeoutId = setTimeout(
-			() => reject(new Error("Request timeout")),
-			timeoutMs,
+	let idTiempo: NodeJS.Timeout;
+	const promesaTiempo = new Promise<never>((_, reject) => {
+		idTiempo = setTimeout(
+			() => reject(new Error("Tiempo de espera agotado")),
+			tiempoMs,
 		);
 	});
 
-	return Promise.race([promise, timeoutPromise]).finally(() =>
-		clearTimeout(timeoutId),
+	return Promise.race([promise, promesaTiempo]).finally(() =>
+		clearTimeout(idTiempo),
 	);
 }
 
-// --- Server Actions para obtención de datos de inteligencia ---
-
-/** Obtiene la presencia territorial de cárteles por estado para el mapa principal */
-export async function getLiveMapData(): Promise<LiveStatePresence[]> {
+export async function obtenerDatosMapa() {
 	try {
-		const res = await fetchWithTimeout<Response>(client.api.map.$get());
-		const json = await res.json();
-		return json.data as LiveStatePresence[];
+		const res = await obtenerConTiempo(client.api.map.$get());
+		return (await parsearRespuesta(res, z.array(PresenciaEstadoSchema))) ?? [];
 	} catch (error) {
-		console.error("Error [getLiveMapData]:", error);
+		console.error("Error [obtenerDatosMapa]:", error);
 		return [];
 	}
 }
 
-/** Obtiene el perfil detallado de un cártel específico por su slug */
-export async function getCartelDetails(
-	cartelSlug: string,
-): Promise<LiveCartelDetails | null> {
+export async function obtenerDetalleCartel(slug: string) {
 	try {
-		const res = await fetchWithTimeout<Response>(
-			client.api.cartel[":slug"].$get({ param: { slug: cartelSlug } }),
+		const res = await obtenerConTiempo(
+			client.api.cartel[":slug"].$get({ param: { slug } }),
 		);
-		const json = await res.json();
-		return json.data as LiveCartelDetails;
+		return await parsearRespuesta(res, DetalleCartelSchema);
 	} catch (error) {
-		console.error("Error [getCartelDetails]:", error);
+		console.error("Error [obtenerDetalleCartel]:", error);
 		return null;
 	}
 }
 
-/** Obtiene la lista básica de todos los cárteles (nombre, color, slug) para filtros */
-export async function getAllCartelsBasic() {
+export async function obtenerCarteles() {
 	try {
-		const res = await fetchWithTimeout<Response>(client.api.cartels.$get());
-		if (!res.ok) throw new Error("Failed to fetch cartels");
-		const json = await res.json();
-		return json.data;
+		const res = await obtenerConTiempo(client.api.cartels.$get());
+		if (!res.ok) return [];
+		return (await parsearRespuesta(res, z.array(CartelBasicoSchema))) ?? [];
 	} catch (error) {
-		console.error("Error [getAllCartelsBasic]:", error);
+		console.error("Error [obtenerCarteles]:", error);
 		return [];
 	}
 }
 
-/** Obtiene el informe de inteligencia táctica detallado para un estado específico */
-export async function getStateIntelligence(
-	stateName: string,
-): Promise<LiveStateIntelligence | null> {
+export async function obtenerInteligenciaEstado(nombreEstado: string) {
 	try {
-		const res = await fetchWithTimeout<Response>(
-			client.api.state[":name"].$get({ param: { name: stateName } }),
+		const res = await obtenerConTiempo(
+			client.api.state[":name"].$get({ param: { name: nombreEstado } }),
 		);
-		if (!res.ok)
-			return res.status === 404 ? null : Promise.reject("Fetch failed");
-		const json = await res.json();
-		return json.data as LiveStateIntelligence;
+		return await parsearRespuesta(res, InteligenciaEstadoSchema);
 	} catch (error) {
-		console.error("Error [getStateIntelligence]:", error);
+		console.error("Error [obtenerInteligenciaEstado]:", error);
 		return null;
 	}
 }

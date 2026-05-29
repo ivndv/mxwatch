@@ -14,8 +14,8 @@ export const metadata: Metadata = {
  */
 export default function PrivacyPage() {
 	return (
-		<article className="max-w-3xl mx-auto px-4 py-20 text-[#8b98b8] leading-relaxed">
-			<h1 className="text-3xl font-bold text-[#f0f4ff] mb-2">
+		<article className="max-w-3xl mx-auto px-4 py-20 text-secondary leading-relaxed">
+			<h1 className="text-3xl font-bold text-primary mb-2">
 				Política de Privacidad
 			</h1>
 			<p className="text-sm text-accent font-medium mb-12 uppercase tracking-widest">
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
 			{/* Sección 1: Declaración de no recopilación de datos personales */}
 			<section className="mb-10">
-				<h2 className="text-xl font-bold text-[#f0f4ff] mb-4">
+				<h2 className="text-xl font-bold text-primary mb-4">
 					1. Recopilación de Datos
 				</h2>
 				<p>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
 
 			{/* Sección 2: Transparencia sobre herramientas de análisis */}
 			<section className="mb-10">
-				<h2 className="text-xl font-bold text-[#f0f4ff] mb-4">
+				<h2 className="text-xl font-bold text-primary mb-4">
 					2. Analíticas de Uso
 				</h2>
 				<p>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
 
 			{/* Sección 3: Uso de almacenamiento local del navegador */}
 			<section className="mb-10">
-				<h2 className="text-xl font-bold text-[#f0f4ff] mb-4">
+				<h2 className="text-xl font-bold text-primary mb-4">
 					3. Cookies y Almacenamiento Local
 				</h2>
 				<p>
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
 
 			{/* Sección 4: Responsabilidad sobre enlaces externos */}
 			<section className="mb-10">
-				<h2 className="text-xl font-bold text-[#f0f4ff] mb-4">
+				<h2 className="text-xl font-bold text-primary mb-4">
 					4. Enlaces a Terceros
 				</h2>
 				<p>
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
 
 			{/* Sección 5: Compromiso con la seguridad de la infraestructura */}
 			<section className="mb-10">
-				<h2 className="text-xl font-bold text-[#f0f4ff] mb-4">5. Seguridad</h2>
+				<h2 className="text-xl font-bold text-primary mb-4">5. Seguridad</h2>
 				<p>
 					Estamos comprometidos a asegurar que su información esté segura. Para
 					prevenir el acceso o divulgación no autorizados, hemos puesto en

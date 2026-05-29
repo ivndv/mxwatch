@@ -7,8 +7,11 @@ import Link from "next/link";
  */
 export default function Navbar() {
 	return (
-		<header className="fixed top-0 left-0 right-0 z-50 h-[64px] border-b border-white/10 bg-[#080c12]/60 backdrop-blur-md">
-			<nav className="w-full max-w-6xl mx-auto h-full px-4 sm:px-6 flex items-center justify-center">
+		<header className="fixed top-0 left-0 right-0 z-50 h-[64px] border-b border-white/10 bg-surface/60 backdrop-blur-md pt-[env(safe-area-inset-top)]">
+			<nav
+				className="w-full max-w-6xl mx-auto h-full px-4 sm:px-6 flex items-center justify-center"
+				aria-label="Navegación principal"
+			>
 				{/* Enlace al Home con logotipo y branding */}
 				<Link
 					href="/"
@@ -23,7 +26,7 @@ export default function Navbar() {
 						className="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(230,57,70,0.3)]"
 					/>
 					<div className="flex flex-col leading-none">
-						<span className="text-lg font-bold tracking-tight text-[#f0f4ff]">
+						<span className="text-lg font-bold tracking-tight text-primary">
 							mxwatch
 						</span>
 						{/* Indicador de estado del proyecto */}

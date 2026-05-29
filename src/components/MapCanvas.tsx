@@ -13,12 +13,15 @@ import {
 	ZoomableGroup,
 } from "react-simple-maps";
 import { feature } from "topojson-client";
-import { getLiveMapData } from "@/actions/mapData";
+import { obtenerDatosMapa } from "@/actions/mapData";
 import {
-	useLiveStateData,
-	useMapActions,
-	useSelectedCartel,
-	useSelectedState,
+	useAccionesMapa,
+	useBusqueda,
+	useCargandoDatosPresencia,
+	useCartelSeleccionado,
+	useDatosPresencia,
+	useErrorDatosPresencia,
+	useEstadoSeleccionado,
 } from "@/store/mapStore";
 
 // Recurso TopoJSON con los límites geográficos de México.
@@ -38,11 +41,6 @@ interface TooltipState {
 	y: number; // Posición Y relativa
 }
 
-interface ErrorState {
-	map: string | null;
-	data: string | null;
-}
-
 interface TopoData {
 	type: "Topology";
 	arcs: unknown[];
@@ -60,6 +58,19 @@ interface CartelStyle {
 	liveDataRaw: { color?: string } | null;
 }
 
+interface PatronDef {
+	id: string;
+	colores: string[];
+}
+
+function obtenerColoresOrdenados(carteles: Array<{ color: string }>): string[] {
+	return carteles.map((c) => c.color).sort();
+}
+
+function generarIdPatron(colores: string[]): string {
+	return `patron-${colores.map((c) => c.replace("#", "")).join("-")}`;
+}
+
 interface MemoizedMapProps {
 	features: unknown[];
 	position: { coordinates: [number, number]; zoom: number };
@@ -67,12 +78,13 @@ interface MemoizedMapProps {
 		coordinates: [number, number];
 		zoom: number;
 	}) => void;
-	getCartelStyle: (stateName: string) => CartelStyle;
+	getCartelStyle: (nombreEstado: string) => CartelStyle;
 	selectedState: string | null;
 	setSelectedState: (state: string | null) => void;
 	setTooltip: React.Dispatch<React.SetStateAction<TooltipState | null>>;
 	mapScale: number;
 	containerRef: React.RefObject<HTMLDivElement | null>;
+	patronesDefs: PatronDef[];
 }
 
 /**
@@ -80,10 +92,18 @@ interface MemoizedMapProps {
  */
 export default function MapCanvas() {
 	// Estado Global (Zustand)
-	const selectedCartel = useSelectedCartel();
-	const selectedState = useSelectedState();
-	const liveStateData = useLiveStateData();
-	const { setSelectedState, setLiveStateData } = useMapActions();
+	const cartelSeleccionado = useCartelSeleccionado();
+	const estadoSeleccionado = useEstadoSeleccionado();
+	const datosPresencia = useDatosPresencia();
+	const busqueda = useBusqueda();
+	const {
+		establecerEstadoSeleccionado,
+		establecerDatosPresencia,
+		establecerCargandoDatosPresencia,
+		establecerErrorDatosPresencia,
+	} = useAccionesMapa();
+	const cargandoDatosPresencia = useCargandoDatosPresencia();
+	const errorDatosPresencia = useErrorDatosPresencia();
 
 	// Estado Local: Vista, datos crudos y UI
 	const [position, setPosition] = useState({
@@ -92,8 +112,8 @@ export default function MapCanvas() {
 	});
 	const [topoData, setTopoData] = useState<TopoData | null>(null);
 	const [tooltip, setTooltip] = useState<TooltipState | null>(null);
-	const [errors, setErrors] = useState<ErrorState>({ map: null, data: null });
-	const [isLoading, setIsLoading] = useState({ map: true, data: true });
+	const [errorMapa, setErrorMapa] = useState<string | null>(null);
+	const [cargandoMapa, setCargandoMapa] = useState(true);
 
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -102,41 +122,41 @@ export default function MapCanvas() {
 		const controller = new AbortController();
 
 		// 1. Carga de Geometría
-		setIsLoading((prev) => ({ ...prev, map: true }));
+		setCargandoMapa(true);
 		fetch(geoUrl, { signal: controller.signal })
 			.then((res) => (res.ok ? res.json() : Promise.reject()))
 			.then((data) => {
 				setTopoData(data);
-				setErrors((prev) => ({ ...prev, map: null }));
+				setErrorMapa(null);
 			})
 			.catch(
-				(err) =>
-					err.name !== "AbortError" &&
-					setErrors((prev) => ({ ...prev, map: "Error geometría" })),
+				(err) => err.name !== "AbortError" && setErrorMapa("Error geometría"),
 			)
-			.finally(() => setIsLoading((prev) => ({ ...prev, map: false })));
+			.finally(() => setCargandoMapa(false));
 
 		// 2. Carga de Inteligencia en Vivo
-		setIsLoading((prev) => ({ ...prev, data: true }));
-		getLiveMapData()
+		establecerCargandoDatosPresencia(true);
+		obtenerDatosMapa()
 			.then((data) => {
-				setLiveStateData(data);
-				setErrors((prev) => ({ ...prev, data: null }));
+				establecerDatosPresencia(data);
+				establecerErrorDatosPresencia(null);
 			})
-			.catch(() =>
-				setErrors((prev) => ({ ...prev, data: "Error inteligencia" })),
-			)
-			.finally(() => setIsLoading((prev) => ({ ...prev, data: false })));
+			.catch(() => establecerErrorDatosPresencia("Error inteligencia"))
+			.finally(() => establecerCargandoDatosPresencia(false));
 
 		return () => controller.abort();
-	}, [setLiveStateData]);
+	}, [
+		establecerDatosPresencia,
+		establecerCargandoDatosPresencia,
+		establecerErrorDatosPresencia,
+	]);
 
 	/** Handlers de control de cámara (Zoom/Reset) */
 	const handleZoomIn = useCallback(
 		() =>
 			setPosition((p) => ({
 				...p,
-				zoom: Math.min(p.zoom * ZOOM_STEP, MAX_ZOOM),
+				zoom: Math.min((p.zoom || DEFAULT_ZOOM) * ZOOM_STEP, MAX_ZOOM),
 			})),
 		[],
 	);
@@ -144,7 +164,7 @@ export default function MapCanvas() {
 		() =>
 			setPosition((p) => ({
 				...p,
-				zoom: Math.max(p.zoom / ZOOM_STEP, DEFAULT_ZOOM),
+				zoom: Math.max((p.zoom || DEFAULT_ZOOM) / ZOOM_STEP, DEFAULT_ZOOM),
 			})),
 		[],
 	);
@@ -153,8 +173,8 @@ export default function MapCanvas() {
 		[],
 	);
 	const handleClearSelection = useCallback(
-		() => setSelectedState(null),
-		[setSelectedState],
+		() => establecerEstadoSeleccionado(null),
+		[establecerEstadoSeleccionado],
 	);
 
 	/** Efecto: Atajos de teclado para navegación táctica (+, -, R, ESC) */
@@ -186,12 +206,13 @@ export default function MapCanvas() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [handleZoomIn, handleZoomOut, handleReset, handleClearSelection]);
 
-	/** Lógica de estilizado dinámico: colores, opacidad y patrones según filtros y dominio */
 	const getCartelStyle = useCallback(
-		(stateName: string): CartelStyle => {
-			const stateRecord = liveStateData.find((s) => s.stateName === stateName);
+		(nombreEstado: string): CartelStyle => {
+			const registro = datosPresencia.find(
+				(s) => s.nombre_estado === nombreEstado,
+			);
 
-			if (!stateRecord || stateRecord.cartels.length === 0) {
+			if (!registro || registro.carteles.length === 0) {
 				return {
 					fill: "rgba(25, 40, 60, 0.4)",
 					stroke: "rgba(80, 110, 150, 0.4)",
@@ -202,56 +223,89 @@ export default function MapCanvas() {
 				};
 			}
 
-			const isCartelMatch =
-				selectedCartel &&
-				stateRecord.cartels.some(
-					(c) => c.slug === selectedCartel || c.id === selectedCartel,
+			const hayCoincidencia =
+				cartelSeleccionado &&
+				registro.carteles.some(
+					(c) => c.slug === cartelSeleccionado || c.id === cartelSeleccionado,
 				);
-			const isDimmed = selectedCartel && !isCartelMatch;
-			const dominantCartel =
-				stateRecord.cartels.find((c) => c.isDominant) || stateRecord.cartels[0];
-			const primaryColor = dominantCartel.color;
-			const cartelNames = stateRecord.cartels.map((c) => c.name).join(" / ");
+			const estaAtenuado = cartelSeleccionado && !hayCoincidencia;
+			const enModoBusqueda = !!busqueda && !cartelSeleccionado;
+			const coincideBusqueda =
+				enModoBusqueda &&
+				(nombreEstado.toLowerCase().includes(busqueda.toLowerCase()) ||
+					registro.carteles.some(
+						(c) =>
+							c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+							c.slug.toLowerCase().includes(busqueda.toLowerCase()),
+					));
+			const cartelPrincipal = registro.carteles[0];
+			const colorPrincipal = cartelPrincipal.color;
+			const nombresCarteles = registro.carteles
+				.map((c) => c.nombre)
+				.join(" / ");
 
-			// Caso especial: Tamaulipas (patrón de bicefalia)
-			if (stateRecord.cartels.length > 1 && stateName === "Tamaulipas") {
+			// Search mode: highlight/dim sin cartel seleccionado
+			if (enModoBusqueda) {
+				if (registro.carteles.length > 1) {
+					const colores = obtenerColoresOrdenados(registro.carteles);
+					const idPatron = generarIdPatron(colores);
+					return {
+						fill: `url(#${idPatron})`,
+						stroke: coincideBusqueda ? "white" : `${colorPrincipal}30`,
+						strokeWidth: coincideBusqueda ? 2 : 1,
+						cartel: nombresCarteles,
+						opacity: coincideBusqueda ? 1 : 0.2,
+						liveDataRaw: cartelPrincipal,
+					};
+				}
 				return {
-					fill: isDimmed
-						? "url(#pattern-tamaulipas-dimmed)"
-						: isCartelMatch
-							? "url(#pattern-tamaulipas-highlighted)"
-							: "url(#pattern-tamaulipas-normal)",
-					stroke: isDimmed
-						? `${primaryColor}30`
-						: isCartelMatch
-							? "white"
-							: primaryColor,
-					strokeWidth: isCartelMatch ? 2 : 1,
-					cartel: cartelNames,
-					opacity: isDimmed ? 0.4 : 1,
-					liveDataRaw: dominantCartel,
+					fill: coincideBusqueda
+						? `${colorPrincipal}dd`
+						: `${colorPrincipal}18`,
+					stroke: coincideBusqueda ? "white" : `${colorPrincipal}30`,
+					strokeWidth: coincideBusqueda ? 2 : 1,
+					cartel: nombresCarteles,
+					opacity: coincideBusqueda ? 1 : 0.2,
+					liveDataRaw: cartelPrincipal,
 				};
 			}
 
-			// Estilo estándar por cartel dominante
+			if (registro.carteles.length > 1) {
+				const colores = obtenerColoresOrdenados(registro.carteles);
+				const idPatron = generarIdPatron(colores);
+
+				return {
+					fill: `url(#${idPatron})`,
+					stroke: estaAtenuado
+						? `${colorPrincipal}30`
+						: hayCoincidencia
+							? "white"
+							: colorPrincipal,
+					strokeWidth: hayCoincidencia ? 2 : 1,
+					cartel: nombresCarteles,
+					opacity: estaAtenuado ? 0.2 : hayCoincidencia ? 1 : 0.5,
+					liveDataRaw: cartelPrincipal,
+				};
+			}
+
 			return {
-				fill: isDimmed
-					? `${primaryColor}18`
-					: isCartelMatch
-						? `${primaryColor}dd`
-						: `${primaryColor}44`,
-				stroke: isDimmed
-					? `${primaryColor}30`
-					: isCartelMatch
+				fill: estaAtenuado
+					? `${colorPrincipal}18`
+					: hayCoincidencia
+						? `${colorPrincipal}dd`
+						: `${colorPrincipal}44`,
+				stroke: estaAtenuado
+					? `${colorPrincipal}30`
+					: hayCoincidencia
 						? "white"
-						: primaryColor,
-				strokeWidth: isCartelMatch ? 2 : 1,
-				cartel: cartelNames,
-				opacity: isDimmed ? 0.4 : 1,
-				liveDataRaw: dominantCartel,
+						: colorPrincipal,
+				strokeWidth: hayCoincidencia ? 2 : 1,
+				cartel: nombresCarteles,
+				opacity: estaAtenuado ? 0.4 : 1,
+				liveDataRaw: cartelPrincipal,
 			};
 		},
-		[selectedCartel, liveStateData],
+		[cartelSeleccionado, datosPresencia, busqueda],
 	);
 
 	// Memoización de features TopoJSON para evitar recálculos costosos
@@ -277,25 +331,44 @@ export default function MapCanvas() {
 		[],
 	);
 
+	// Patrones SVG dinámicos para estados con múltiples carteles
+	const patronesDefs = useMemo<PatronDef[]>(() => {
+		const unicas = new Map<string, string[]>();
+		for (const estado of datosPresencia) {
+			if (estado.carteles.length > 1) {
+				const colores = obtenerColoresOrdenados(estado.carteles);
+				const key = colores.join(",");
+				if (!unicas.has(key)) {
+					unicas.set(key, colores);
+				}
+			}
+		}
+		return Array.from(unicas.entries()).map(([_, colores]) => ({
+			id: generarIdPatron(colores),
+			colores,
+		}));
+	}, [datosPresencia]);
+
 	return (
 		<div
 			ref={mapContainerRef}
-			className="relative flex-1 w-full h-full bg-[#080c12] overflow-hidden cursor-crosshair"
+			className="relative flex-1 w-full h-full bg-surface overflow-hidden cursor-crosshair touch-manipulation"
 		>
 			{/* HUD: Gestión de errores y carga */}
-			{errors.map && <ErrorDisplay message={errors.map} />}
-			{errors.data && <ErrorDisplay message={errors.data} />}
-			{isLoading.map && !errors.map && <LoadingOverlay />}
+			{errorMapa && <ErrorDisplay message={errorMapa} />}
+			{errorDatosPresencia && <ErrorDisplay message={errorDatosPresencia} />}
+			{cargandoMapa && !errorMapa && <LoadingOverlay />}
+			{cargandoDatosPresencia && !cargandoMapa && <CargandoDatos />}
 
 			<div
-				className="absolute inset-0 flex items-center justify-center bg-[#05080c]"
+				className="absolute inset-0 flex items-center justify-center bg-surface-alt"
 				style={{
 					backgroundImage: `radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px)`,
 				}}
 			>
 				{tooltip && <StrategicTooltip tooltip={tooltip} />}
 
-				{!topoData && !errors.map ? (
+				{!topoData && !errorMapa ? (
 					<LoadingIndicator />
 				) : (
 					topoData && (
@@ -304,11 +377,12 @@ export default function MapCanvas() {
 							position={position}
 							handleMoveEnd={setPosition}
 							getCartelStyle={getCartelStyle}
-							selectedState={selectedState}
-							setSelectedState={setSelectedState}
+							selectedState={estadoSeleccionado}
+							setSelectedState={establecerEstadoSeleccionado}
 							setTooltip={setTooltip}
 							mapScale={mapScale}
 							containerRef={mapContainerRef}
+							patronesDefs={patronesDefs}
 						/>
 					)
 				)}
@@ -333,11 +407,11 @@ const StrategicTooltip = React.memo(
 			className="absolute z-50 pointer-events-none transition-transform duration-75 ease-out"
 			style={{ left: tooltip.x + 15, top: tooltip.y + 15 }}
 		>
-			<div className="bg-[#0a0f18]/95 backdrop-blur-md border border-white/10 rounded-lg p-3 shadow-2xl flex flex-col gap-1.5 min-w-[180px]">
-				<span className="text-[10px] font-black uppercase tracking-widest text-[#5e6c8b]">
+			<div className="bg-tooltip/95 backdrop-blur-md border border-white/10 rounded-lg p-3 shadow-2xl flex flex-col gap-1.5 min-w-[180px]">
+				<span className="text-[10px] font-black uppercase tracking-widest text-tertiary">
 					Estado
 				</span>
-				<span className="text-sm font-bold text-[#f0f4ff]">
+				<span className="text-sm font-bold text-primary">
 					{tooltip.content}
 				</span>
 				<div className="h-[1px] w-full bg-white/5 my-0.5" />
@@ -360,18 +434,29 @@ const StrategicTooltip = React.memo(
 StrategicTooltip.displayName = "StrategicTooltip";
 
 const LoadingOverlay = () => (
-	<div className="absolute inset-0 bg-[#080c12]/80 backdrop-blur-sm flex items-center justify-center z-40">
+	<div className="absolute inset-0 bg-surface/80 backdrop-blur-sm flex items-center justify-center z-40">
 		<div className="flex flex-col items-center gap-4">
 			<div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-			<span className="text-xs font-mono uppercase tracking-[0.2em] text-[#8b98b8]">
+			<span className="text-xs font-mono uppercase tracking-[0.2em] text-secondary">
 				Sincronizando...
 			</span>
 		</div>
 	</div>
 );
 
+const CargandoDatos = () => (
+	<div className="absolute top-4 right-4 z-30">
+		<div className="bg-card/80 backdrop-blur-sm border border-white/10 rounded-lg px-3 py-2 flex items-center gap-2">
+			<div className="w-3 h-3 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
+			<span className="text-[10px] font-mono text-secondary">
+				Cargando datos...
+			</span>
+		</div>
+	</div>
+);
+
 const LoadingIndicator = React.memo(() => (
-	<div className="flex flex-col items-center gap-4 text-[#8b98b8]">
+	<div className="flex flex-col items-center gap-4 text-secondary">
 		<div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
 		<span className="text-xs font-mono uppercase tracking-[0.2em]">
 			Cargando Mapa...
@@ -392,12 +477,12 @@ const MapControls = React.memo(
 		onReset: () => void;
 		zoom: number;
 	}) => (
-		<div className="absolute top-20 md:bottom-6 right-4 md:right-6 flex flex-col gap-2 z-20">
+		<div className="absolute top-20 md:bottom-6 right-3 md:right-6 flex flex-col gap-2 z-20">
 			<button
 				type="button"
 				onClick={onZoomIn}
 				disabled={zoom >= MAX_ZOOM}
-				className="w-9 h-9 rounded-lg bg-[#0f1520]/80 border border-white/10 hover:bg-[#1c2636] transition-all disabled:opacity-30"
+				className="w-11 h-11 rounded-lg bg-card/80 border border-white/10 hover:bg-hover transition-all disabled:opacity-30 flex items-center justify-center text-lg"
 				aria-label="Acercar"
 			>
 				+
@@ -406,7 +491,7 @@ const MapControls = React.memo(
 				type="button"
 				onClick={onZoomOut}
 				disabled={zoom <= DEFAULT_ZOOM}
-				className="w-9 h-9 rounded-lg bg-[#0f1520]/80 border border-white/10 hover:bg-[#1c2636] transition-all disabled:opacity-30"
+				className="w-11 h-11 rounded-lg bg-card/80 border border-white/10 hover:bg-hover transition-all disabled:opacity-30 flex items-center justify-center text-lg"
 				aria-label="Alejar"
 			>
 				-
@@ -414,7 +499,7 @@ const MapControls = React.memo(
 			<button
 				type="button"
 				onClick={onReset}
-				className="w-9 h-9 rounded-lg bg-[#0f1520]/80 border border-white/10 text-accent hover:bg-accent/10 transition-all"
+				className="w-11 h-11 rounded-lg bg-card/80 border border-white/10 text-accent hover:bg-accent/10 transition-all flex items-center justify-center"
 				aria-label="Resetear"
 			>
 				⟲
@@ -425,7 +510,7 @@ const MapControls = React.memo(
 MapControls.displayName = "MapControls";
 
 const KeyboardShortcutsHint = () => (
-	<div className="absolute bottom-6 left-6 z-30 bg-[#0f1520]/60 backdrop-blur-sm border border-white/5 rounded-lg px-3 py-2 text-[10px] font-mono text-[#5e6c8b] hidden md:block">
+	<div className="absolute bottom-6 left-6 z-30 bg-card/60 backdrop-blur-sm border border-white/5 rounded-lg px-3 py-2 text-[10px] font-mono text-tertiary hidden md:block">
 		<div className="flex items-center gap-3">
 			<span>+ / - : Zoom</span>
 			<span>R : Reset</span>
@@ -435,7 +520,10 @@ const KeyboardShortcutsHint = () => (
 );
 
 const ErrorDisplay = ({ message }: { message: string }) => (
-	<div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
+	<div
+		role="alert"
+		className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50"
+	>
 		<div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 flex items-center gap-2">
 			<span className="text-red-400 text-xs font-mono">⚠️ {message}</span>
 			<button
@@ -463,32 +551,41 @@ const MemoizedMap = React.memo(
 		setTooltip,
 		mapScale,
 		containerRef,
+		patronesDefs,
 	}: MemoizedMapProps) => {
 		const handleMouseEnter = useCallback(
-			(e: React.MouseEvent, stateName: string, style: CartelStyle) => {
+			(
+				e: React.MouseEvent | React.TouchEvent,
+				nombreEstado: string,
+				style: CartelStyle,
+			) => {
 				if (!containerRef.current) return;
 				const rect = containerRef.current.getBoundingClientRect();
+				const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+				const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 				setTooltip({
-					content: stateName,
+					content: nombreEstado,
 					cartel: style.cartel,
 					color:
 						style.stroke === "white"
 							? (style.liveDataRaw?.color ?? "#8b98b8")
 							: style.stroke,
-					x: e.clientX - rect.left,
-					y: e.clientY - rect.top,
+					x: clientX - rect.left,
+					y: clientY - rect.top,
 				});
 			},
 			[containerRef, setTooltip],
 		);
 
 		const handleMouseMove = useCallback(
-			(e: React.MouseEvent) => {
+			(e: React.MouseEvent | React.TouchEvent) => {
 				if (!containerRef.current) return;
 				const rect = containerRef.current.getBoundingClientRect();
+				const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+				const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 				setTooltip((prev) =>
 					prev
-						? { ...prev, x: e.clientX - rect.left, y: e.clientY - rect.top }
+						? { ...prev, x: clientX - rect.left, y: clientY - rect.top }
 						: null,
 				);
 			},
@@ -501,57 +598,34 @@ const MemoizedMap = React.memo(
 					projection="geoMercator"
 					projectionConfig={{ scale: mapScale, center: MEXICO_CENTER }}
 					className="w-full h-full"
+					role="img"
+					aria-label="Mapa de México con control territorial de cárteles"
 				>
 					<defs>
-						{/* Patrones SVG para zonas de disputa territorial (bicefalia) */}
-						<pattern
-							id="pattern-tamaulipas-normal"
-							width="12"
-							height="12"
-							patternUnits="userSpaceOnUse"
-							patternTransform="rotate(45)"
-						>
-							<rect width="6" height="12" fill="#9b59b6" fillOpacity={0.4} />
-							<rect
-								x="6"
-								width="6"
-								height="12"
-								fill="#1abc9c"
-								fillOpacity={0.4}
-							/>
-						</pattern>
-						<pattern
-							id="pattern-tamaulipas-highlighted"
-							width="12"
-							height="12"
-							patternUnits="userSpaceOnUse"
-							patternTransform="rotate(45)"
-						>
-							<rect width="6" height="12" fill="#9b59b6" fillOpacity={0.8} />
-							<rect
-								x="6"
-								width="6"
-								height="12"
-								fill="#1abc9c"
-								fillOpacity={0.8}
-							/>
-						</pattern>
-						<pattern
-							id="pattern-tamaulipas-dimmed"
-							width="12"
-							height="12"
-							patternUnits="userSpaceOnUse"
-							patternTransform="rotate(45)"
-						>
-							<rect width="6" height="12" fill="#9b59b6" fillOpacity={0.15} />
-							<rect
-								x="6"
-								width="6"
-								height="12"
-								fill="#1abc9c"
-								fillOpacity={0.15}
-							/>
-						</pattern>
+						{patronesDefs.map((p) => {
+							const anchoFranja = 12 / p.colores.length;
+							return (
+								<pattern
+									key={p.id}
+									id={p.id}
+									width="12"
+									height="12"
+									patternUnits="userSpaceOnUse"
+									patternTransform="rotate(45)"
+								>
+									{p.colores.map((color, i) => (
+										<rect
+											key={color}
+											x={i * anchoFranja}
+											width={anchoFranja}
+											height="12"
+											fill={color}
+											fillOpacity={0.5}
+										/>
+									))}
+								</pattern>
+							);
+						})}
 					</defs>
 
 					<ZoomableGroup
@@ -563,8 +637,8 @@ const MemoizedMap = React.memo(
 						<Geographies geography={features}>
 							{({ geographies }) =>
 								geographies.map((geo) => {
-									const stateName = geo.properties.state_name;
-									const style = getCartelStyle(stateName);
+									const nombreEstado = geo.properties.state_name;
+									const style = getCartelStyle(nombreEstado);
 									return (
 										<Geography
 											key={geo.rsmKey}
@@ -572,16 +646,36 @@ const MemoizedMap = React.memo(
 											fill={style.fill}
 											stroke={style.stroke}
 											strokeWidth={style.strokeWidth}
+											tabIndex={0}
+											role="button"
+											aria-label={nombreEstado}
 											onMouseEnter={(e) =>
-												handleMouseEnter(e, stateName, style)
+												handleMouseEnter(e, nombreEstado, style)
 											}
 											onMouseMove={handleMouseMove}
 											onMouseLeave={() => setTooltip(null)}
+											onTouchStart={(e) =>
+												handleMouseEnter(e, nombreEstado, style)
+											}
+											onTouchMove={handleMouseMove}
+											onTouchEnd={() =>
+												setTimeout(() => setTooltip(null), 1500)
+											}
 											onClick={() =>
 												setSelectedState(
-													selectedState === stateName ? null : stateName,
+													selectedState === nombreEstado ? null : nombreEstado,
 												)
 											}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													setSelectedState(
+														selectedState === nombreEstado
+															? null
+															: nombreEstado,
+													);
+												}
+											}}
 											style={{
 												default: {
 													opacity: style.opacity,
@@ -593,7 +687,13 @@ const MemoizedMap = React.memo(
 													stroke: "white",
 													strokeWidth: 2,
 												},
+												pressed: {
+													fillOpacity: 0.6,
+													stroke: "white",
+													strokeWidth: 3,
+												},
 											}}
+											className="focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
 										/>
 									);
 								})
@@ -604,10 +704,6 @@ const MemoizedMap = React.memo(
 			</div>
 		);
 	},
-	(prev, next) =>
-		prev.position.zoom === next.position.zoom &&
-		prev.selectedState === next.selectedState &&
-		prev.features === next.features,
 );
 
 MemoizedMap.displayName = "MemoizedMap";

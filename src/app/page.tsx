@@ -33,7 +33,7 @@ export default function Home() {
 	};
 
 	return (
-		<div className="relative w-full flex flex-col items-center justify-center min-h-[calc(100dvh-64px)] px-8 text-center py-20 overflow-hidden">
+		<main className="relative w-full flex flex-col items-center justify-center min-h-[calc(100dvh-64px)] px-8 text-center py-20 overflow-hidden">
 			<motion.div
 				className="w-full max-w-6xl mx-auto flex flex-col items-center"
 				variants={containerVariants}
@@ -57,7 +57,7 @@ export default function Home() {
 				{/* Badge de estado actual de la plataforma */}
 				<motion.div
 					variants={itemVariants}
-					className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-wide uppercase text-[#8b98b8] shadow-sm backdrop-blur-md"
+					className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-wide uppercase text-secondary shadow-sm backdrop-blur-md"
 				>
 					<span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_var(--accent-glow)]" />
 					Plataforma Beta
@@ -66,7 +66,7 @@ export default function Home() {
 				{/* Encabezado principal con jerarquía visual y gradiente de acento */}
 				<motion.h1
 					variants={itemVariants}
-					className="max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl text-[#f0f4ff] drop-shadow-sm leading-[1.15]"
+					className="max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl text-primary drop-shadow-sm leading-[1.15]"
 				>
 					La seguridad de México, <br className="hidden sm:block" />
 					<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#f47e86]">
@@ -76,7 +76,7 @@ export default function Home() {
 
 				<motion.p
 					variants={itemVariants}
-					className="mt-6 max-w-2xl text-lg leading-relaxed text-[#8b98b8] font-medium"
+					className="mt-6 max-w-2xl text-lg leading-relaxed text-secondary font-medium"
 				>
 					Una herramienta interactiva y transparente para rastrear el control
 					territorial de los cárteles y eventos de seguridad a lo largo de toda
@@ -84,28 +84,29 @@ export default function Home() {
 				</motion.p>
 
 				{/* Rejilla de estadísticas rápidas (KPIs) del sistema */}
-				<motion.div
+				<motion.ul
 					variants={itemVariants}
 					className="mt-20 w-full max-w-3xl grid grid-cols-2 gap-4 sm:grid-cols-3"
 				>
+					<h2 className="sr-only">Estadísticas de cobertura</h2>
 					{[
 						{ label: "Cárteles mapeados", value: "5" },
 						{ label: "Estados cubiertos", value: "32" },
 						{ label: "Eventos registrados", value: "0", highlight: false },
 					].map(({ label, value, highlight = true }) => (
-						<div
+						<li
 							key={label}
-							className={`flex flex-col items-center justify-center gap-1 rounded-2xl border ${highlight ? "border-white/5 bg-[#0f1520] shadow-sm" : "border-white/5 bg-[#080c12] opacity-60"} p-6 transition-colors hover:bg-[#1c2636] backdrop-blur-sm`}
+							className={`flex flex-col items-center justify-center gap-1 rounded-2xl border ${highlight ? "border-white/5 bg-card shadow-sm" : "border-white/5 bg-surface opacity-60"} p-6 transition-colors hover:bg-hover backdrop-blur-sm`}
 						>
-							<span className="text-3xl font-bold tracking-tight text-[#f0f4ff]">
+							<span className="text-3xl font-bold tracking-tight text-primary">
 								{value}
 							</span>
-							<span className="text-sm font-medium text-[#8b98b8] text-center">
+							<span className="text-sm font-medium text-secondary text-center">
 								{label}
 							</span>
-						</div>
+						</li>
 					))}
-				</motion.div>
+				</motion.ul>
 
 				{/* Llamada a la acción (CTA) principal hacia el mapa */}
 				<motion.div
@@ -134,6 +135,6 @@ export default function Home() {
 					</Link>
 				</motion.div>
 			</motion.div>
-		</div>
+		</main>
 	);
 }

@@ -3,10 +3,13 @@ import { devtools } from "zustand/middleware";
 import { crearDatosSlice, type DatosSlice } from "./datosSlice";
 import { crearMapaSlice, type MapaSlice } from "./mapaSlice";
 
+// Store combinado del mapa: estado visual (MapaSlice) y datos del servidor (DatosSlice)
 type Store = MapaSlice & DatosSlice;
 
+// Crea el store combinando los dos slices con devtools
 export const useMapStore = create<Store>()(
 	devtools(
+		// Combina los dos slices en un solo store
 		(...a) => ({
 			...crearMapaSlice(...(a as Parameters<typeof crearMapaSlice>)),
 			...crearDatosSlice(...(a as Parameters<typeof crearDatosSlice>)),
@@ -18,14 +21,14 @@ export const useMapStore = create<Store>()(
 	),
 );
 
-// Mapa
+// Selectores del mapa
 export const useBusqueda = () => useMapStore((s) => s.busqueda);
 export const useCartelSeleccionado = () =>
 	useMapStore((s) => s.cartelSeleccionado);
 export const useEstadoSeleccionado = () =>
 	useMapStore((s) => s.estadoSeleccionado);
 
-// Datos
+// Selectores de datos
 export const useDatosPresencia = () => useMapStore((s) => s.datosPresencia);
 export const useCargandoDatosPresencia = () =>
 	useMapStore((s) => s.cargandoDatosPresencia);
@@ -46,8 +49,9 @@ export const useTodosCarteles = () => useMapStore((s) => s.todosCarteles);
 export const useCargandoCarteles = () => useMapStore((s) => s.cargandoCarteles);
 export const useErrorCarteles = () => useMapStore((s) => s.errorCarteles);
 
-// Acciones
+// Hook que expone todos los setters de ambos slices
 export const useAccionesMapa = () => {
+	// Setters del mapa
 	const establecerBusqueda = useMapStore((s) => s.establecerBusqueda);
 	const establecerCartelSeleccionado = useMapStore(
 		(s) => s.establecerCartelSeleccionado,
@@ -57,6 +61,8 @@ export const useAccionesMapa = () => {
 		(s) => s.establecerEstadoSeleccionado,
 	);
 	const reiniciarMapa = useMapStore((s) => s.reiniciarMapa);
+
+	// Setters de datos
 	const establecerDatosPresencia = useMapStore(
 		(s) => s.establecerDatosPresencia,
 	);
@@ -88,12 +94,16 @@ export const useAccionesMapa = () => {
 	);
 	const establecerErrorCarteles = useMapStore((s) => s.establecerErrorCarteles);
 
+	// Retorna todos los setters para usarlos en componentes
 	return {
+		// Mapa
 		establecerBusqueda,
 		establecerCartelSeleccionado,
 		alternarCartel,
 		establecerEstadoSeleccionado,
 		reiniciarMapa,
+
+		// Datos
 		establecerDatosPresencia,
 		establecerCargandoDatosPresencia,
 		establecerErrorDatosPresencia,

@@ -1,7 +1,12 @@
+// SEO
 import type { Metadata } from "next";
+
+// React
 import { Suspense } from "react";
-import MapCanvas from "@/components/MapCanvas";
-import MapSidebar from "@/components/MapSidebar";
+
+// Componentes del mapa
+import MapCanvas from "@/components/mapa";
+import MapSidebar from "@/components/sidebar/index";
 
 export const metadata: Metadata = {
 	title: "Mapa interactivo — mxwatch",
@@ -23,6 +28,7 @@ export const dynamic = "force-dynamic";
 export default function MapaPage() {
 	return (
 		<div className="flex flex-col md:flex-row h-[calc(100dvh-64px)] w-full overflow-hidden bg-surface">
+			{/* Sidebar lazy con skeleton en mobile */}
 			<Suspense
 				fallback={<div className="w-full md:w-[380px] bg-card shrink-0" />}
 			>

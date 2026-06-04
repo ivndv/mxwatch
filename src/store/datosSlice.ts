@@ -1,5 +1,6 @@
 import type { StateCreator } from "zustand";
 import type {
+	CartelBasico,
 	DetalleCartel,
 	InteligenciaEstado,
 	PresenciaEstado,
@@ -15,12 +16,7 @@ export interface DatosSlice {
 	detalleCartel: DetalleCartel | null;
 	cargandoDetalleCartel: boolean;
 	errorDetalleCartel: string | null;
-	todosCarteles: {
-		id: string;
-		nombre: string;
-		slug: string;
-		color: string;
-	}[];
+	todosCarteles: CartelBasico[];
 	cargandoCarteles: boolean;
 	errorCarteles: string | null;
 	establecerDatosPresencia: (data: PresenciaEstado[]) => void;
@@ -32,9 +28,7 @@ export interface DatosSlice {
 	establecerDetalleCartel: (data: DetalleCartel | null) => void;
 	establecerCargandoDetalleCartel: (v: boolean) => void;
 	establecerErrorDetalleCartel: (e: string | null) => void;
-	establecerTodosCarteles: (
-		data: { id: string; nombre: string; slug: string; color: string }[],
-	) => void;
+	establecerTodosCarteles: (data: CartelBasico[]) => void;
 	establecerCargandoCarteles: (v: boolean) => void;
 	establecerErrorCarteles: (e: string | null) => void;
 	reiniciarDatos: () => void;

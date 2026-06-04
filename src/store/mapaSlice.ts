@@ -7,7 +7,7 @@ export interface MapaSlice {
 	establecerBusqueda: (query: string) => void;
 	establecerCartelSeleccionado: (id: string | null) => void;
 	alternarCartel: (id: string) => void;
-	establecerEstadoSeleccionado: (name: string | null) => void;
+	establecerEstadoSeleccionado: (nombre: string | null) => void;
 	reiniciarMapa: () => void;
 }
 
@@ -28,7 +28,7 @@ export const crearMapaSlice: StateCreator<MapaSlice, [], [], MapaSlice> = (
 		set({ cartelSeleccionado: cartelSeleccionado === id ? null : id });
 	},
 
-	establecerEstadoSeleccionado: (name) => set({ estadoSeleccionado: name }),
+	establecerEstadoSeleccionado: (nombre) => set({ estadoSeleccionado: nombre }),
 
 	reiniciarMapa: () =>
 		set({ busqueda: "", cartelSeleccionado: null, estadoSeleccionado: null }),

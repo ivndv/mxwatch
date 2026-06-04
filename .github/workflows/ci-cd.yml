@@ -104,7 +104,7 @@ jobs:
         run: bun install
 
       - name: Build & Deploy
-        run: bunx opennextjs-cloudflare build && bunx opennextjs-cloudflare deploy
+        run: bunx opennextjs-cloudflare build && bunx wrangler deploy .open-next/worker.js --assets .open-next/assets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

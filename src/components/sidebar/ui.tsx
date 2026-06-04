@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 
+// Componentes atómicos reutilizables del sidebar
+
+// Icono de búsqueda (lupa)
 const SearchIcon = () => (
 	<svg
 		className="w-4 h-4 text-tertiary absolute left-3 top-1/2 -translate-y-1/2"
@@ -18,6 +21,7 @@ const SearchIcon = () => (
 	</svg>
 );
 
+// Botón para limpiar el input de búsqueda
 const ClearButton = ({ onClick }: { onClick: () => void }) => (
 	<button
 		type="button"
@@ -42,6 +46,7 @@ const ClearButton = ({ onClick }: { onClick: () => void }) => (
 	</button>
 );
 
+// Icono de check para indicar selección
 const CheckIcon = ({ color }: { color: string }) => (
 	<svg
 		className="w-3.5 h-3.5 flex-shrink-0"
@@ -58,6 +63,7 @@ const CheckIcon = ({ color }: { color: string }) => (
 	</svg>
 );
 
+// Tooltip de información con toggle al hacer clic/hover
 const InfoTooltip = ({ content }: { content: string }) => {
 	const [abierto, setAbierto] = useState(false);
 	return (
@@ -78,6 +84,7 @@ const InfoTooltip = ({ content }: { content: string }) => {
 	);
 };
 
+// Alerta de error con botón de reintentar opcional
 const ErrorAlert = ({
 	message,
 	onRetry,
@@ -104,6 +111,7 @@ const ErrorAlert = ({
 	</motion.div>
 );
 
+// Footer del panel con información de versión
 const SidebarFooter = React.memo(() => (
 	<div className="p-4 border-t border-white/5 mt-auto flex flex-col items-center gap-2">
 		<span className="text-[10px] uppercase tracking-widest text-tertiary font-medium">

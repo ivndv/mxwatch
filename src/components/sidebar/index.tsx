@@ -1,12 +1,20 @@
 "use client";
+
+// Animaciones
 import { AnimatePresence, motion } from "framer-motion";
+
+// React y Next
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+// Server actions
 import {
 	obtenerCarteles,
 	obtenerDetalleCartel,
 	obtenerInteligenciaEstado,
 } from "@/actions/mapData";
+
+// Store (Zustand)
 import {
 	useBusqueda,
 	useCargandoDetalleCartel,
@@ -22,11 +30,13 @@ import {
 	useMapStore,
 	useTodosCarteles,
 } from "@/store/mapStore";
-import CartelLegend from "./CartelLegend";
-import DetalleCartelPanel from "./DetalleCartelPanel";
-import QuickStats from "./QuickStats";
-import SearchResults from "./SearchResults";
-import SelectedStatePanel from "./SelectedStatePanel";
+
+// Componentes locales
+import LeyendaCarteles from "./LeyendaCarteles";
+import PanelDetalleCartel from "./PanelDetalleCartel";
+import EstadisticasRapidas from "./EstadisticasRapidas";
+import ResultadosBusqueda from "./ResultadosBusqueda";
+import PanelEstadoSeleccionado from "./PanelEstadoSeleccionado";
 import {
 	ClearButton,
 	ErrorAlert,
@@ -39,6 +49,7 @@ export default function Sidebar() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
+	// Selectores de estado global (Zustand)
 	const busqueda = useBusqueda();
 	const cartelSeleccionado = useCartelSeleccionado();
 	const estadoSeleccionado = useEstadoSeleccionado();
@@ -51,6 +62,7 @@ export default function Sidebar() {
 	const errorDetalleCartel = useErrorDetalleCartel();
 	const errorCarteles = useErrorCarteles();
 
+	// Acciones del store
 	const establecerBusqueda = useMapStore((s) => s.establecerBusqueda);
 	const alternarCartel = useMapStore((s) => s.alternarCartel);
 	const establecerEstadoSeleccionado = useMapStore(
@@ -83,6 +95,7 @@ export default function Sidebar() {
 		[inteligenciaEstado],
 	);
 
+	// Sincronización con URL: lectura inicial (solo al montar)
 	// biome-ignore lint/correctness/useExhaustiveDependencies: solo al montar
 	useEffect(() => {
 		const params = new URLSearchParams(searchParams.toString());
@@ -95,6 +108,7 @@ export default function Sidebar() {
 		if (urlState && !estadoSeleccionado) establecerEstadoSeleccionado(urlState);
 	}, []);
 
+	// Sincronización con URL: escritura al cambiar estado
 	useEffect(() => {
 		const params = new URLSearchParams();
 		if (cartelSeleccionado) params.set("cartel", cartelSeleccionado);
@@ -107,6 +121,7 @@ export default function Sidebar() {
 		router.replace(nuevaUrl, { scroll: false });
 	}, [cartelSeleccionado, busqueda, estadoSeleccionado, router]);
 
+	// Atajos de teclado: ESC, Ctrl+F, Alt+1-9
 	useEffect(() => {
 		const manejarTecla = (e: KeyboardEvent) => {
 			if (e.target instanceof HTMLInputElement) return;
@@ -155,6 +170,7 @@ export default function Sidebar() {
 		alternarCartel,
 	]);
 
+	// Carga inicial del listado de cárteles
 	useEffect(() => {
 		establecerCargandoCarteles(true);
 		obtenerCarteles()
@@ -162,7 +178,7 @@ export default function Sidebar() {
 				establecerTodosCarteles(data);
 				establecerErrorCarteles(null);
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error("Error al cargar carteles:", err);
 				establecerErrorCarteles("Fallo al cargar listado");
 			})
@@ -173,6 +189,7 @@ export default function Sidebar() {
 		establecerCargandoCarteles,
 	]);
 
+	// Carga de inteligencia del estado seleccionado
 	useEffect(() => {
 		if (!estadoSeleccionado) {
 			establecerInteligenciaEstado(null);
@@ -191,7 +208,7 @@ export default function Sidebar() {
 				}
 				establecerInteligenciaEstado(data);
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error("Error al cargar inteligencia:", err);
 				establecerErrorInteligencia("Error de conexión");
 			})
@@ -203,6 +220,7 @@ export default function Sidebar() {
 		establecerInteligenciaEstado,
 	]);
 
+	// Carga de detalle del cártel seleccionado
 	useEffect(() => {
 		if (!cartelSeleccionado) {
 			establecerDetalleCartel(null);
@@ -221,7 +239,7 @@ export default function Sidebar() {
 				}
 				establecerDetalleCartel(data);
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error("Error al cargar detalle del cártel:", err);
 				establecerErrorDetalleCartel("Error de conexión");
 			})
@@ -233,6 +251,7 @@ export default function Sidebar() {
 		establecerErrorDetalleCartel,
 	]);
 
+	// Reintentos de carga
 	const reintentarCarteles = useCallback(() => {
 		establecerCargandoCarteles(true);
 		establecerErrorCarteles(null);
@@ -261,6 +280,7 @@ export default function Sidebar() {
 		establecerCargandoInteligencia,
 	]);
 
+	// Control de apertura del panel en mobile
 	const [sidebarAbierta, setSidebarAbierta] = useState(false);
 
 	useEffect(() => {
@@ -280,6 +300,7 @@ export default function Sidebar() {
 					aria-label="Cerrar panel"
 				/>
 			)}
+			{/* Panel lateral de inteligencia */}
 			<aside
 				className={`
 					fixed md:relative bottom-0 left-0 right-0 z-30
@@ -299,6 +320,7 @@ export default function Sidebar() {
 					<div className="w-10 h-1 rounded-full bg-tertiary" />
 				</button>
 				<div className="p-3 md:p-4 border-b border-white/10 bg-surface/50 backdrop-blur-md sticky top-0 z-10">
+					{/* Encabezado y barra de búsqueda */}
 					<div className="flex items-center justify-between mb-2 md:mb-3">
 						<h2 className="text-[10px] md:text-sm font-bold tracking-widest uppercase text-primary">
 							Centro de Análisis
@@ -319,6 +341,8 @@ export default function Sidebar() {
 				</div>
 
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">
+					{/* Tabs de navegación */}
+					{/* Tabs de navegación */}
 					<div
 						className="flex border-b border-white/5 bg-card sticky top-0 z-10"
 						role="tablist"
@@ -344,6 +368,7 @@ export default function Sidebar() {
 					</div>
 
 					<div className="p-4 flex flex-col gap-6">
+						{/* Panel de estado seleccionado con inteligencia */}
 						<AnimatePresence mode="wait">
 							{estadoSeleccionado && (
 								<motion.div
@@ -365,7 +390,7 @@ export default function Sidebar() {
 											onRetry={reintentarInteligencia}
 										/>
 									) : inteligenciaEstado ? (
-										<SelectedStatePanel
+										<PanelEstadoSeleccionado
 											selectedState={estadoSeleccionado}
 											stateIntelligence={inteligenciaEstado}
 											primaryColor={colorPrincipal}
@@ -376,11 +401,13 @@ export default function Sidebar() {
 							)}
 						</AnimatePresence>
 
-						<QuickStats
+						{/* Estadísticas rápidas */}
+						<EstadisticasRapidas
 							stateCount={datosPresencia.length}
 							cartelsCount={todosCarteles.length}
 						/>
 
+						{/* Detalle de cártel seleccionado */}
 						<AnimatePresence mode="wait">
 							{cartelSeleccionado && !estadoSeleccionado && (
 								<motion.div
@@ -416,7 +443,7 @@ export default function Sidebar() {
 											}}
 										/>
 									) : detalleCartel ? (
-										<DetalleCartelPanel
+										<PanelDetalleCartel
 											cartel={detalleCartel}
 											onClear={() => alternarCartel(cartelSeleccionado)}
 										/>
@@ -425,19 +452,22 @@ export default function Sidebar() {
 							)}
 						</AnimatePresence>
 
-						<SearchResults />
+						{/* Resultados de búsqueda */}
+						<ResultadosBusqueda />
 
+						{/* Leyenda de cárteles o error de carga */}
 						{errorCarteles ? (
 							<ErrorAlert
 								message={errorCarteles}
 								onRetry={reintentarCarteles}
 							/>
 						) : (
-							<CartelLegend />
+							<LeyendaCarteles />
 						)}
 					</div>
 				</div>
 
+				{/* Footer del panel */}
 				<SidebarFooter />
 			</aside>
 		</>

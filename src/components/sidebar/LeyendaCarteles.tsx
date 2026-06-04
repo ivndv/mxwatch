@@ -7,13 +7,16 @@ import {
 } from "@/store/mapStore";
 import { CheckIcon } from "./ui";
 
-const CartelLegend = React.memo(() => {
+// Leyenda interactiva de cárteles con filtro y selección
+const LeyendaCarteles = React.memo(() => {
+	// Selectores del store
 	const todosCarteles = useTodosCarteles();
 	const cartelSeleccionado = useCartelSeleccionado();
 	const datosPresencia = useDatosPresencia();
 	const alternarCartel = useMapStore((s) => s.alternarCartel);
 	const busqueda = useMapStore((s) => s.busqueda);
 
+	// Filtra cárteles por texto de búsqueda
 	const cartelesFiltrados = useMemo(() => {
 		if (!busqueda) return todosCarteles;
 		return todosCarteles.filter((c) =>
@@ -21,6 +24,7 @@ const CartelLegend = React.memo(() => {
 		);
 	}, [todosCarteles, busqueda]);
 
+	// Cuenta en cuántos estados tiene presencia cada cártel
 	const conteoPorCartel = useMemo(() => {
 		return datosPresencia.reduce<Record<string, number>>((acc, infoEstado) => {
 			infoEstado.carteles.forEach((c) => {
@@ -40,6 +44,7 @@ const CartelLegend = React.memo(() => {
 
 	return (
 		<div className="flex flex-col gap-3">
+			{/* Encabezado con botón de limpiar selección */}
 			<h3 className="text-xs font-bold uppercase text-secondary tracking-wider flex items-center gap-2">
 				Despliegue Territorial
 				{cartelSeleccionado && (
@@ -53,6 +58,7 @@ const CartelLegend = React.memo(() => {
 				)}
 			</h3>
 
+			{/* Lista de cárteles */}
 			<div className="flex flex-col gap-1.5">
 				{cartelesFiltrados.map((cartel) => {
 					const isSelected =
@@ -92,6 +98,6 @@ const CartelLegend = React.memo(() => {
 		</div>
 	);
 });
-CartelLegend.displayName = "CartelLegend";
+LeyendaCarteles.displayName = "LeyendaCarteles";
 
-export default CartelLegend;
+export default LeyendaCarteles;

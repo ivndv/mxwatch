@@ -1,8 +1,14 @@
 // biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON-LD para SEO
+
+// Tipografías
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
+
+// SEO y analíticas
 import Script from "next/script";
+
+// Componentes persistentes
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 

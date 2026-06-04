@@ -1,6 +1,6 @@
 import React from "react";
 import type { InteligenciaEstado } from "@/schemas/api.schemas";
-import CartelDetail from "./CartelDetail";
+import DetalleCartelEstado from "./DetalleCartelEstado";
 
 interface Props {
 	selectedState: string;
@@ -9,7 +9,8 @@ interface Props {
 	onClear: () => void;
 }
 
-const SelectedStatePanel = React.memo(
+// Panel de inteligencia del estado seleccionado en el mapa
+const PanelEstadoSeleccionado = React.memo(
 	({ selectedState, stateIntelligence, primaryColor, onClear }: Props) => (
 		<div
 			className="rounded-xl border p-4 flex flex-col gap-3 transition-all"
@@ -22,6 +23,7 @@ const SelectedStatePanel = React.memo(
 					: "rgba(255,255,255,0.03)",
 			}}
 		>
+			{/* Encabezado con botón de cerrar */}
 			<div className="flex items-center justify-between">
 				<span className="text-[10px] font-black uppercase tracking-widest text-tertiary">
 					Estado seleccionado
@@ -38,6 +40,7 @@ const SelectedStatePanel = React.memo(
 			<h3 className="text-base font-bold text-primary">{selectedState}</h3>
 
 			<div className="flex flex-col gap-6">
+				{/* Indicador de zona en disputa */}
 				{stateIntelligence.carteles.length > 1 && (
 					<div className="bg-orange-500/10 border border-orange-500/20 p-2 rounded-lg text-center">
 						<span className="text-xs font-bold text-orange-400 uppercase">
@@ -46,12 +49,12 @@ const SelectedStatePanel = React.memo(
 					</div>
 				)}
 				{stateIntelligence.carteles.map((cartelInfo, idx) => (
-					<CartelDetail key={cartelInfo.id} cartel={cartelInfo} index={idx} />
+					<DetalleCartelEstado key={cartelInfo.id} cartel={cartelInfo} index={idx} />
 				))}
 			</div>
 		</div>
 	),
 );
-SelectedStatePanel.displayName = "SelectedStatePanel";
+PanelEstadoSeleccionado.displayName = "PanelEstadoSeleccionado";
 
-export default SelectedStatePanel;
+export default PanelEstadoSeleccionado;

@@ -6,7 +6,8 @@ import {
 	useMapStore,
 } from "@/store/mapStore";
 
-const SearchResults = () => {
+// Resultados de búsqueda filtrados por estado o cártel
+const ResultadosBusqueda = () => {
 	const busqueda = useBusqueda();
 	const datosPresencia = useDatosPresencia();
 	const estadoSeleccionado = useEstadoSeleccionado();
@@ -14,6 +15,7 @@ const SearchResults = () => {
 		(s) => s.establecerEstadoSeleccionado,
 	);
 
+	// Filtra estados por nombre o cártel coincidente
 	const estadosFiltrados = useMemo(() => {
 		if (!busqueda) return [];
 		const q = busqueda.toLowerCase();
@@ -35,6 +37,7 @@ const SearchResults = () => {
 			<h3 className="text-xs font-bold uppercase text-secondary tracking-wider">
 				Estados ({estadosFiltrados.length})
 			</h3>
+			{/* Lista de estados coincidentes */}
 			<div className="flex flex-col gap-1">
 				{estadosFiltrados.map((e) => {
 					const esSeleccionado = estadoSeleccionado === e.nombre_estado;
@@ -69,4 +72,4 @@ const SearchResults = () => {
 	);
 };
 
-export default SearchResults;
+export default ResultadosBusqueda;

@@ -1,6 +1,9 @@
 "use client";
 
+// Animaciones
 import { motion, type Variants } from "framer-motion";
+
+// Navegación
 import Link from "next/link";
 
 /**

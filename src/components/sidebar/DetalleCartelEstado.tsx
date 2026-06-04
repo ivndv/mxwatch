@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import React from "react";
 import type { InteligenciaEstado } from "@/schemas/api.schemas";
 
-const CartelDetail = React.memo(
+// Detalle expandido de un cártel dentro del panel de estado seleccionado
+const DetalleCartelEstado = React.memo(
 	({
 		cartel,
 		index,
@@ -16,12 +17,14 @@ const CartelDetail = React.memo(
 			transition={{ delay: index * 0.05 }}
 			className={`flex flex-col gap-3 ${index > 0 ? "pt-6 border-t border-white/10 relative" : ""}`}
 		>
+			{/* Separador entre cárteles si hay múltiples */}
 			{index > 0 && (
 				<div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-[8px] text-tertiary uppercase font-bold">
 					Resistencia / Contraparte
 				</div>
 			)}
 
+			{/* Nombre y color del cártel */}
 			<div className="flex items-center gap-2">
 				<div
 					className="w-3 h-3 rounded-sm"
@@ -33,6 +36,7 @@ const CartelDetail = React.memo(
 			</div>
 
 			<div className="flex flex-col gap-4">
+				{/* Jefes máximos */}
 				{cartel.jefes?.length > 0 && (
 					<div className="flex flex-col gap-1">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -49,6 +53,7 @@ const CartelDetail = React.memo(
 					</div>
 				)}
 
+				{/* Operadores regionales */}
 				{cartel.personas?.length > 0 && (
 					<div className="flex flex-col gap-1">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -62,6 +67,7 @@ const CartelDetail = React.memo(
 					</div>
 				)}
 
+				{/* Facciones operativas */}
 				{cartel.facciones?.length > 0 && (
 					<div className="flex flex-col gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -78,6 +84,7 @@ const CartelDetail = React.memo(
 					</div>
 				)}
 
+				{/* Brazos armados */}
 				{cartel.brazos_armados?.length > 0 && (
 					<div className="flex flex-col gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -97,6 +104,6 @@ const CartelDetail = React.memo(
 		</motion.div>
 	),
 );
-CartelDetail.displayName = "CartelDetail";
+DetalleCartelEstado.displayName = "DetalleCartelEstado";
 
-export default CartelDetail;
+export default DetalleCartelEstado;

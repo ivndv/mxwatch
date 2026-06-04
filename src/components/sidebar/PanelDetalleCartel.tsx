@@ -1,7 +1,8 @@
 import React from "react";
 import type { DetalleCartel } from "@/schemas/api.schemas";
 
-const DetalleCartelPanel = React.memo(
+// Panel con información detallada de un cártel seleccionado
+const PanelDetalleCartel = React.memo(
 	({ cartel, onClear }: { cartel: DetalleCartel; onClear: () => void }) => (
 		<div
 			className="rounded-xl border p-4 flex flex-col gap-3 transition-all"
@@ -10,6 +11,7 @@ const DetalleCartelPanel = React.memo(
 				backgroundColor: `${cartel.color}10`,
 			}}
 		>
+			{/* Encabezado con botón de cerrar */}
 			<div className="flex items-center justify-between">
 				<span className="text-[10px] font-black uppercase tracking-widest text-tertiary">
 					Cártel seleccionado
@@ -24,6 +26,7 @@ const DetalleCartelPanel = React.memo(
 				</button>
 			</div>
 
+			{/* Nombre del cártel */}
 			<div className="flex items-center gap-2">
 				<div
 					className="w-3 h-3 rounded-sm"
@@ -35,6 +38,7 @@ const DetalleCartelPanel = React.memo(
 			</div>
 
 			<div className="flex flex-col gap-4">
+				{/* Presencia por estados */}
 				<div className="flex flex-col gap-1">
 					<span className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
 						Presencia: {cartel.presencia.total_estados} estados
@@ -51,6 +55,7 @@ const DetalleCartelPanel = React.memo(
 					</div>
 				</div>
 
+				{/* Cadena de mando */}
 				{cartel.personas && cartel.personas.length > 0 && (
 					<div className="flex flex-col gap-1">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -64,6 +69,7 @@ const DetalleCartelPanel = React.memo(
 					</div>
 				)}
 
+				{/* Facciones operativas */}
 				{cartel.facciones && cartel.facciones.length > 0 && (
 					<div className="flex flex-col gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -87,6 +93,7 @@ const DetalleCartelPanel = React.memo(
 					</div>
 				)}
 
+				{/* Brazos armados */}
 				{cartel.brazos_armados && cartel.brazos_armados.length > 0 && (
 					<div className="flex flex-col gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
 						<h4 className="text-[9px] uppercase tracking-widest text-tertiary font-bold">
@@ -106,6 +113,6 @@ const DetalleCartelPanel = React.memo(
 		</div>
 	),
 );
-DetalleCartelPanel.displayName = "DetalleCartelPanel";
+PanelDetalleCartel.displayName = "PanelDetalleCartel";
 
-export default DetalleCartelPanel;
+export default PanelDetalleCartel;

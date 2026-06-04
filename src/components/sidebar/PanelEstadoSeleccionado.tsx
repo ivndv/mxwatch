@@ -49,7 +49,11 @@ const PanelEstadoSeleccionado = React.memo(
 					</div>
 				)}
 				{stateIntelligence.carteles.map((cartelInfo, idx) => (
-					<DetalleCartelEstado key={cartelInfo.id} cartel={cartelInfo} index={idx} />
+					<DetalleCartelEstado
+						key={cartelInfo.id}
+						cartel={cartelInfo}
+						index={idx}
+					/>
 				))}
 			</div>
 		</div>

@@ -1,19 +1,13 @@
 "use client";
 
+import type { FeatureCollection } from "geojson";
 // React y hooks
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
-
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // TopoJSON y GeoJSON
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
-import type { FeatureCollection } from "geojson";
-
+// Server actions
+import { obtenerDatosMapa } from "@/actions/mapData";
 // Store (Zustand)
 import {
 	useAccionesMapa,
@@ -24,22 +18,22 @@ import {
 	useErrorDatosPresencia,
 	useEstadoSeleccionado,
 } from "@/store/mapStore";
-
-// Server actions
-import { obtenerDatosMapa } from "@/actions/mapData";
-
-// Componentes locales del mapa
-import { calcularEstiloCartel, generarIdPatron, obtenerColoresOrdenados } from "./estilosCartel";
-import type { PatronDef, TooltipState } from "./estilosCartel";
-import TooltipEstrategico from "./TooltipEstrategico";
-import MapaControles, { IndicadorAtajos } from "./MapaControles";
 import {
+	CargandoInicial,
 	CargandoMapaCompleto,
 	IndicadorCargaDatos,
-	CargandoInicial,
 	MensajeError,
 } from "./EstadosCarga";
+import type { PatronDef, TooltipState } from "./estilosCartel";
+// Componentes locales del mapa
+import {
+	calcularEstiloCartel,
+	generarIdPatron,
+	obtenerColoresOrdenados,
+} from "./estilosCartel";
+import MapaControles, { IndicadorAtajos } from "./MapaControles";
 import MapaRenderizado from "./MapaRenderizado";
+import TooltipEstrategico from "./TooltipEstrategico";
 
 // Recurso TopoJSON con los límites geográficos de México.
 const geoUrl = "/maps/mexico.json";
@@ -96,12 +90,10 @@ export default function MapCanvas() {
 				setErrorMapa(null);
 			})
 			// Ignora errores por aborto controlado
-			.catch(
-				(err: unknown) => {
-					if (err instanceof DOMException && err.name === "AbortError") return;
-					setErrorMapa("Error geometría");
-				},
-			)
+			.catch((err: unknown) => {
+				if (err instanceof DOMException && err.name === "AbortError") return;
+				setErrorMapa("Error geometría");
+			})
 			// Quita el indicador de carga
 			.finally(() => setCargandoMapa(false));
 
@@ -205,7 +197,10 @@ export default function MapCanvas() {
 	const features = useMemo(() => {
 		if (!topoData?.objects?.states) return [];
 		try {
-			const result = feature(topoData, "states") as unknown as FeatureCollection;
+			const result = feature(
+				topoData,
+				"states",
+			) as unknown as FeatureCollection;
 			return result.features;
 		} catch {
 			// Si falla la conversión, features queda vacío

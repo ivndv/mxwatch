@@ -62,9 +62,7 @@ export function calcularEstiloCartel(
 	busqueda: string,
 ): CartelStyle {
 	// Busca el registro de presencia para este estado
-	const registro = datosPresencia.find(
-		(s) => s.nombre_estado === nombreEstado,
-	);
+	const registro = datosPresencia.find((s) => s.nombre_estado === nombreEstado);
 
 	// Estado sin datos: color neutro
 	if (!registro || registro.carteles.length === 0) {
@@ -96,9 +94,7 @@ export function calcularEstiloCartel(
 			));
 	const cartelPrincipal = registro.carteles[0];
 	const colorPrincipal = cartelPrincipal.color;
-	const nombresCarteles = registro.carteles
-		.map((c) => c.nombre)
-		.join(" / ");
+	const nombresCarteles = registro.carteles.map((c) => c.nombre).join(" / ");
 
 	// Modo búsqueda: resalta el estado si coincide, lo atenúa si no
 	if (enModoBusqueda) {
@@ -117,9 +113,7 @@ export function calcularEstiloCartel(
 		}
 		// Un solo cártel: color sólido
 		return {
-			fill: coincideBusqueda
-				? `${colorPrincipal}dd`
-				: `${colorPrincipal}18`,
+			fill: coincideBusqueda ? `${colorPrincipal}dd` : `${colorPrincipal}18`,
 			stroke: coincideBusqueda ? "white" : `${colorPrincipal}30`,
 			strokeWidth: coincideBusqueda ? 2 : 1,
 			cartel: nombresCarteles,

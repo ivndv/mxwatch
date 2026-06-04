@@ -5,10 +5,7 @@ import {
 	Geography,
 	ZoomableGroup,
 } from "react-simple-maps";
-import type {
-	CartelStyle,
-	MapaMemoizadoProps,
-} from "./estilosCartel";
+import type { CartelStyle, MapaMemoizadoProps } from "./estilosCartel";
 
 const MEXICO_CENTER: [number, number] = [-102.34, 24.01];
 const MAX_ZOOM = 8;
@@ -147,9 +144,7 @@ const MapaRenderizado = React.memo(
 											// Selecciona o desselecciona el estado al hacer clic
 											onClick={() =>
 												setSelectedState(
-													selectedState === nombreEstado
-														? null
-														: nombreEstado,
+													selectedState === nombreEstado ? null : nombreEstado,
 												)
 											}
 											// Selecciona con Enter o Espacio (accesibilidad)

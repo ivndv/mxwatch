@@ -30,13 +30,12 @@ import {
 	useMapStore,
 	useTodosCarteles,
 } from "@/store/mapStore";
-
+import EstadisticasRapidas from "./EstadisticasRapidas";
 // Componentes locales
 import LeyendaCarteles from "./LeyendaCarteles";
 import PanelDetalleCartel from "./PanelDetalleCartel";
-import EstadisticasRapidas from "./EstadisticasRapidas";
-import ResultadosBusqueda from "./ResultadosBusqueda";
 import PanelEstadoSeleccionado from "./PanelEstadoSeleccionado";
+import ResultadosBusqueda from "./ResultadosBusqueda";
 import {
 	ClearButton,
 	ErrorAlert,

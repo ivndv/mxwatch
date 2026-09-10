@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import React from "react";
-import type { InteligenciaEstado } from "@/schemas/api.schemas";
+import type { InteligenciaEstado } from "@/schemas/api";
 
 // Detalle expandido de un cártel dentro del panel de estado seleccionado
 const DetalleCartelEstado = React.memo(

@@ -9,8 +9,8 @@ import "./globals.css";
 import Script from "next/script";
 
 // Componentes persistentes
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
+import Footer from "@/components/layout/Footer";
+import Navbar from "@/components/layout/Navbar";
 
 // Configuración de tipografías optimizadas con Google Fonts
 const inter = Inter({

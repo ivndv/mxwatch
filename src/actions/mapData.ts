@@ -1,13 +1,13 @@
 "use server";
 
 import { z } from "zod";
+import { parsearRespuesta } from "@/lib/api";
 import {
 	CartelBasicoSchema,
 	DetalleCartelSchema,
 	InteligenciaEstadoSchema,
 	PresenciaEstadoSchema,
-	parsearRespuesta,
-} from "@/schemas/api.schemas";
+} from "@/schemas/api";
 
 // URL base del backend
 const API_URL = process.env.API_URL || "http://localhost:3001";

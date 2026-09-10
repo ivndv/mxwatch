@@ -1,5 +1,5 @@
 import React from "react";
-import type { TooltipState } from "./estilosCartel";
+import type { TooltipState } from "@/types/mapa";
 
 // Tooltip que sigue al cursor mostrando el nombre del estado y su cártel
 const TooltipEstrategico = React.memo(

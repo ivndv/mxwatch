@@ -52,7 +52,7 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 ```
 mxwatch/
 ├── .open-next/                    → Build artifacts generados por OpenNext
-├── public/                        → Assets públicos estáticos (logos, favicons, topojson)
+├── public/                        → Assets públicos mínimos (_headers)
 ├── src/
 │   ├── actions/                   → Server Actions de Next.js
 │   │   └── mapData.ts             → Fetch server-to-server hacia mxwatch-api con Zod y API_KEY
@@ -66,29 +66,39 @@ mxwatch/
 │   │   ├── robots.ts & sitemap.ts → SEO y metadatos
 │   │   └── not-found.tsx          → Manejo 404
 │   ├── components/
-│   │   ├── Navbar.tsx & Footer.tsx→ Navegación global
-│   │   ├── mapa/                  → Componentes del mapa táctico
+│   │   ├── layout/                → Componentes de estructura global (Navbar.tsx, Footer.tsx)
+│   │   ├── mapa/                  → Componentes visuales del mapa interactivo
 │   │   │   ├── index.tsx          → Contenedor orquestador del mapa
 │   │   │   ├── MapaRenderizado.tsx→ Render SVG interactivo con react-simple-maps
 │   │   │   ├── MapaControles.tsx  → Zoom, reset y controles flotantes
 │   │   │   ├── TooltipEstrategico.tsx → Tooltip en hover sobre estados
-│   │   │   ├── EstadosCarga.tsx   → Skeleton loaders y feedback visual
-│   │   │   └── estilosCartel.ts   → Paleta de colores e identidades visuales
-│   │   └── sidebar/               → Barra lateral interactiva
-│   │       ├── index.tsx          → Orquestador de la barra lateral
-│   │       ├── PanelEstadoSeleccionado.tsx → Detalle del estado enfocado
-│   │       ├── PanelDetalleCartel.tsx      → Métricas e inteligencia del cártel
-│   │       ├── ResultadosBusqueda.tsx      → Resultados filtrados dinámicamente
-│   │       ├── EstadisticasRapidas.tsx     → Resumen general del territorio
-│   │       └── LeyendaCarteles.tsx         → Guía de simbología táctica
+│   │   │   └── EstadosCarga.tsx   → Skeleton loaders y feedback visual
+│   │   ├── sidebar/               → Barra lateral interactiva
+│   │   │   ├── index.tsx          → Orquestador de la barra lateral
+│   │   │   ├── PanelEstadoSeleccionado.tsx → Detalle del estado enfocado
+│   │   │   ├── PanelDetalleCartel.tsx      → Métricas e inteligencia del cártel
+│   │   │   ├── DetalleCartelEstado.tsx     → Desglose por cártel
+│   │   │   ├── ResultadosBusqueda.tsx      → Resultados filtrados dinámicamente
+│   │   │   ├── EstadisticasRapidas.tsx     → Resumen general del territorio
+│   │   │   ├── LeyendaCarteles.tsx         → Guía de simbología táctica
+│   │   │   └── SidebarFooter.tsx           → Pie de versión del panel
+│   │   └── ui/                    → Micro-componentes e iconos reutilizables
+│   │       ├── icons.tsx          → Iconos SVG (SearchIcon, ClearButton, CheckIcon)
+│   │       ├── InfoTooltip.tsx    → Tooltip emergente de información
+│   │       └── ErrorAlert.tsx     → Alerta de error con reintento
+│   ├── lib/                       → Lógica de negocio y utilerías
+│   │   ├── api.ts                 → parsearRespuesta y validación runtime
+│   │   └── mapa.ts                → calcularEstiloCartel y patrones SVG dinámicos
 │   ├── schemas/
-│   │   └── api.schemas.ts         → Contratos de Zod para las respuestas del backend
-│   └── store/
-│       ├── mapStore.ts            → Store principal unificado de Zustand
-│       ├── datosSlice.ts          → Estado de datos de inteligencia y presencia
-│       └── mapaSlice.ts           → Estado visual (zoom, selección, hover, proyección)
+│   │   └── api.ts                 → Contratos y esquemas puros de Zod para la API
+│   ├── store/
+│   │   ├── mapStore.ts            → Store principal unificado de Zustand
+│   │   ├── datosSlice.ts          → Estado de datos de inteligencia y presencia
+│   │   └── mapaSlice.ts           → Estado visual (zoom, selección, hover, proyección)
+│   └── types/
+│       └── mapa.ts                → Interfaces TypeScript compartidas (CartelStyle, TooltipState)
 ├── open-next.config.ts            → Configuración de OpenNext para Cloudflare
-├── wrangler.jsonc                 → Configuración de Cloudflare Pages y Workers assets
+├── wrangler.jsonc                 → Configuración de Cloudflare Workers con Static Assets
 ├── biome.json                     → Configuración de formateo y linting
 └── package.json                   → Dependencias y scripts operativos de Bun
 ```

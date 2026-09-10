@@ -4,7 +4,7 @@ import type {
 	DetalleCartel,
 	InteligenciaEstado,
 	PresenciaEstado,
-} from "@/schemas/api.schemas";
+} from "@/schemas/api";
 
 // Interfaz del slice de datos del mapa: presencia, inteligencia, detalle y
 // listado de cárteles, cada uno con sus estados de carga/error.

@@ -1,5 +1,5 @@
 import React from "react";
-import type { InteligenciaEstado } from "@/schemas/api.schemas";
+import type { InteligenciaEstado } from "@/schemas/api";
 import DetalleCartelEstado from "./DetalleCartelEstado";
 
 interface Props {

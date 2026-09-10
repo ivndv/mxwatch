@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+// Esquemas de validación Zod para las respuestas de mxwatch-api
+
 export const CartelBasicoSchema = z.object({
 	id: z.string().uuid(),
 	nombre: z.string(),
@@ -69,29 +71,11 @@ export const InteligenciaEstadoSchema = z.object({
 	),
 });
 
+// Tipos inferidos de los esquemas Zod
 export type PresenciaEstado = z.infer<typeof PresenciaEstadoSchema>;
 export type DetalleCartel = z.infer<typeof DetalleCartelSchema>;
 export type InteligenciaEstado = z.infer<typeof InteligenciaEstadoSchema>;
 export type CartelBasico = z.infer<typeof CartelBasicoSchema>;
-
-const ExitoRespuestaSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-	z.object({
-		exito: z.literal(true),
-		datos: dataSchema,
-		marca_tiempo: z.iso.datetime().optional(),
-		conteo: z.number().optional(),
-	});
-
-export async function parsearRespuesta<T>(
-	res: Response,
-	schema: z.ZodType<T>,
-): Promise<T | null> {
-	if (!res.ok) return null;
-	const json = await res.json();
-	const parsed = ExitoRespuestaSchema(schema).safeParse(json);
-	if (!parsed.success) {
-		console.error("Error de validación API:", parsed.error.issues);
-		return null;
-	}
-	return parsed.data.datos;
-}
+export type Faccion = z.infer<typeof FaccionSchema>;
+export type Persona = z.infer<typeof PersonaSchema>;
+export type BrazoArmado = z.infer<typeof BrazoArmadoSchema>;

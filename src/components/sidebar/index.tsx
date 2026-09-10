@@ -13,7 +13,9 @@ import {
 	obtenerDetalleCartel,
 	obtenerInteligenciaEstado,
 } from "@/actions/mapData";
-
+import { ErrorAlert } from "@/components/ui/ErrorAlert";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { ClearButton, SearchIcon } from "@/components/ui/icons";
 // Store (Zustand)
 import {
 	useBusqueda,
@@ -36,13 +38,7 @@ import LeyendaCarteles from "./LeyendaCarteles";
 import PanelDetalleCartel from "./PanelDetalleCartel";
 import PanelEstadoSeleccionado from "./PanelEstadoSeleccionado";
 import ResultadosBusqueda from "./ResultadosBusqueda";
-import {
-	ClearButton,
-	ErrorAlert,
-	InfoTooltip,
-	SearchIcon,
-	SidebarFooter,
-} from "./ui";
+import { SidebarFooter } from "./SidebarFooter";
 
 export default function Sidebar() {
 	const router = useRouter();

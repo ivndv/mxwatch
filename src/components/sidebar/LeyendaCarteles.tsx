@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
+import { CheckIcon } from "@/components/ui/icons";
 import {
 	useCartelSeleccionado,
 	useDatosPresencia,
 	useMapStore,
 	useTodosCarteles,
 } from "@/store/mapStore";
-import { CheckIcon } from "./ui";
 
 // Leyenda interactiva de cárteles con filtro y selección
 const LeyendaCarteles = React.memo(() => {

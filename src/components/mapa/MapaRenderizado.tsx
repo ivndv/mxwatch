@@ -5,7 +5,7 @@ import {
 	Geography,
 	ZoomableGroup,
 } from "react-simple-maps";
-import type { CartelStyle, MapaMemoizadoProps } from "./estilosCartel";
+import type { CartelStyle, MapaMemoizadoProps } from "@/types/mapa";
 
 const MEXICO_CENTER: [number, number] = [-102.34, 24.01];
 const MAX_ZOOM = 8;

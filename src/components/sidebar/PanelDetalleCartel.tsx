@@ -1,5 +1,5 @@
 import React from "react";
-import type { DetalleCartel } from "@/schemas/api.schemas";
+import type { DetalleCartel } from "@/schemas/api";
 
 // Panel con información detallada de un cártel seleccionado
 const PanelDetalleCartel = React.memo(

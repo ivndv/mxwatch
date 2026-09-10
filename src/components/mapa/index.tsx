@@ -8,6 +8,12 @@ import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 // Server actions
 import { obtenerDatosMapa } from "@/actions/mapData";
+// Utilerías y cálculos de estilo del mapa
+import {
+	calcularEstiloCartel,
+	generarIdPatron,
+	obtenerColoresOrdenados,
+} from "@/lib/mapa";
 // Store (Zustand)
 import {
 	useAccionesMapa,
@@ -18,19 +24,13 @@ import {
 	useErrorDatosPresencia,
 	useEstadoSeleccionado,
 } from "@/store/mapStore";
+import type { PatronDef, TooltipState } from "@/types/mapa";
 import {
 	CargandoInicial,
 	CargandoMapaCompleto,
 	IndicadorCargaDatos,
 	MensajeError,
 } from "./EstadosCarga";
-import type { PatronDef, TooltipState } from "./estilosCartel";
-// Componentes locales del mapa
-import {
-	calcularEstiloCartel,
-	generarIdPatron,
-	obtenerColoresOrdenados,
-} from "./estilosCartel";
 import MapaControles, { IndicadorAtajos } from "./MapaControles";
 import MapaRenderizado from "./MapaRenderizado";
 import TooltipEstrategico from "./TooltipEstrategico";

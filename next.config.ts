@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
 	devIndicators: {
 		position: "bottom-right",
 	},
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "mxwatch-assets.mgdc.site",
+			},
+		],
+	},
 };
 
 export default nextConfig;

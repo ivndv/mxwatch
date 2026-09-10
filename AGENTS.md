@@ -42,7 +42,8 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 | **Estado Global** | **Zustand 5** | `zustand ^5.0.15` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
 | **Validación de Datos** | **Zod 4** | `zod ^4.6.2` (validación runtime en `src/schemas/api.schemas.ts`) |
 | **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.5.13` (`biome.json` con preset `recommended`) |
-| **Infraestructura** | **Cloudflare Pages** + **Wrangler** | `wrangler ^4.131.0` (`wrangler.jsonc`) |
+| **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.131.0` (`wrangler.jsonc`, OpenNext) |
+| **CDN & Almacenamiento de Assets** | **Cloudflare R2** | Bucket `mxwatch-assets`, dominio `https://mxwatch-assets.mgdc.site` (logos, og-image, favicon, TopoJSON) |
 
 ---
 

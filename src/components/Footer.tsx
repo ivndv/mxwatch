@@ -38,7 +38,7 @@ export default function Footer() {
 							className="flex items-center gap-3 select-none w-fit group"
 						>
 							<Image
-								src="/logo.png"
+								src="https://mxwatch-assets.mgdc.site/logo.png"
 								alt="MxWatch Logo"
 								width={32}
 								height={32}

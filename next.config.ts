@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "mxwatch-assets.mgdc.site",
+				hostname: "assets.mgdc.site",
 			},
 		],
 	},

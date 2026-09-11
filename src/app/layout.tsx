@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 		"crimen organizado",
 		"visualización territorial",
 	],
-	icons: { icon: "https://mxwatch-assets.mgdc.site/favicon.png" },
+	icons: { icon: "https://assets.mgdc.site/mxwatch/favicon.png" },
 	openGraph: {
 		title: "mxwatch",
 		description: "Mapa interactivo de seguridad en México",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 		siteName: "mxwatch",
 		images: [
 			{
-				url: "https://mxwatch-assets.mgdc.site/og-image.png",
+				url: "https://assets.mgdc.site/mxwatch/og-image.png",
 				width: 1200,
 				height: 630,
 			},
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 		title: "mxwatch — Mapa de seguridad en México",
 		description: "Plataforma de visualización de seguridad en México",
 		creator: "@mxwatch",
-		images: ["https://mxwatch-assets.mgdc.site/og-image.png"],
+		images: ["https://assets.mgdc.site/mxwatch/og-image.png"],
 	},
 };
 

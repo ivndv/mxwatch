@@ -19,7 +19,7 @@ export default function Navbar() {
 					aria-label="mxwatch home"
 				>
 					<Image
-						src="https://mxwatch-assets.mgdc.site/logo.png"
+						src="https://assets.mgdc.site/mxwatch/logo.png"
 						alt="MxWatch Logo"
 						width={32}
 						height={32}

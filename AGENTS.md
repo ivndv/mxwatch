@@ -43,7 +43,7 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 | **Validación de Datos** | **Zod 4** | `zod ^4.6.2` (validación runtime en `src/schemas/api.schemas.ts`) |
 | **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.5.13` (`biome.json` con preset `recommended`) |
 | **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.131.0` (`wrangler.jsonc`, OpenNext) |
-| **CDN & Almacenamiento de Assets** | **Cloudflare R2** | Bucket `mxwatch-assets`, dominio `https://mxwatch-assets.mgdc.site` (logos, og-image, favicon, TopoJSON) |
+| **CDN & Almacenamiento de Assets** | **Cloudflare R2** | Bucket `assets-mgdc`, dominio `https://assets.mgdc.site/mxwatch/` (logos, og-image, favicon, TopoJSON) |
 
 ---
 

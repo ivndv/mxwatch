@@ -36,7 +36,7 @@ import MapaRenderizado from "./MapaRenderizado";
 import TooltipEstrategico from "./TooltipEstrategico";
 
 // Recurso TopoJSON con los límites geográficos de México.
-const geoUrl = "https://mxwatch-assets.mgdc.site/maps/mexico.json";
+const geoUrl = "https://assets.mgdc.site/mxwatch/maps/mexico.json";
 
 // Constantes de configuración para la proyección y el zoom.
 const MEXICO_CENTER: [number, number] = [-102.34, 24.01];

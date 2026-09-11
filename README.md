@@ -1,68 +1,74 @@
-# MXWatch (Dashboard Interactivo)
+# MXWatch
 
 ## Descripción
 
-Este proyecto es el tablero visual (Dashboard) de la plataforma MXWatch. Funciona como un mapa interactivo diseñado para consultar y monitorear de forma dinámica la presencia y datos geográficos de diferentes zonas en todo el territorio mexicano.
+Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monitorear la presencia territorial, zonas de cobertura y datos analíticos en todo el territorio mexicano. Conectado a un backend especializado, permite examinar organizaciones registradas, presencia geográfica y eventos relevantes a nivel estatal.
 
 ## Características
 
-- **Mapa Táctico Interactivo**: Visualización gráfica del país donde los colores identifican el estado y control de áreas de forma simplificada.
-- **Búsqueda Dinámica**: Buscador integrado para encontrar zonas y registros específicos desde un panel lateral.
-- **Análisis Desglosado**: Capacidad interactiva de seleccionar y examinar los detalles, metadatos y resúmenes de cualquier estado rápidamente.
-- **Rendimiento Visual**: Construido bajo un tema oscuro exclusivo con herramientas de atajos rápidos de teclado para minimizar la fatiga visual.
+- **Mapa Táctico Interactivo**: Proyección cartográfica vectorial de la República Mexicana con renderizado de estados, niveles de presencia y cobertura territorial.
+- **Panel Lateral de Inteligencia**: Barra lateral táctica con buscador en tiempo real para localizar organizaciones, liderazgos y territorios al instante.
+- **Fichas de Análisis por Estado**: Desglose detallado al seleccionar cualquier entidad federativa: organizaciones registradas, nivel de presencia y eventos recientes.
+- **Perfiles de Organizaciones**: Ficha técnica por grupo con liderazgos, zonas de cobertura, alianzas y registros asociados.
+- **Diseño Táctico Optimizado**: Interfaz inmersiva en tema oscuro diseñada para lectura operativa y visualización analítica.
 
 ## Secciones
 
-1. **Lienzo Central**: El mapa principal de exploración donde puedes interactuar con el diseño gráfico.
-2. **Panel de Búsqueda (Sidebar)**: Lista lateral donde se encuentran organizados los diferentes datos o grupos disponibles en la plataforma.
-3. **Detalles de Zona**: Recuadro de información estructurada que se despliega al dar un clic directo sobre algún estado.
+1. **Mapa General**: Vista cartográfica principal con controles de zoom, navegación interactiva y tooltips informativos por entidad.
+2. **Panel de Búsqueda y Estadísticas**: Métricas rápidas del territorio nacional y buscador dinámico de organizaciones y estados.
+3. **Detalle de Estado**: Panel de inteligencia con el inventario de organizaciones operando en la zona y cronología de eventos.
+4. **Detalle de Organización**: Métricas consolidadas, presencia nacional y estructura de cada organización.
 
 ## Uso
 
-- **Visualizar Contenido**: El proyecto web ya está finalizado. Puedes visitarlo directamente aquí: [MXWatch](https://mxwatch.mgdc.site/).
-- **Exploración Rápida**: Pasa el ratón por todo el plano del mapa general y haz clic en alguna región geográfica para ver la información.
-- **Búsqueda Directa**: Escribe y usa la barra lateral buscando palabras clave para iluminar esa zona específica y obscurecer el resto.
+- **Acceder a la Plataforma**: Explora el tablero en vivo directamente aquí: [MXWatch](https://mxwatch.mgdc.site/).
+- **Navegar por el Mapa**: Haz clic en cualquier estado de la República Mexicana para desplegar su ficha de inteligencia y organizaciones presentes.
+- **Filtrar por Organización**: Usa el buscador del panel lateral para resaltar los estados donde opera una organización específica y consultar su estructura.
+- **Controles de Mapa**: Utiliza los controles flotantes para acercar, alejar o restablecer la vista panorámica del territorio.
 
 ## Tecnologías Utilizadas
 
-- HTML / CSS / TypeScript
-- Next.js 16
-- React
-- Tailwind CSS
-- Zustand
-- Bun
+- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS 4
+- **Cartografía & Visualización**: react-simple-maps, d3-geo, topojson-client
+- **Estado Global**: Zustand 5
+- **Validación de Datos**: Zod 4
+- **Herramientas & Linter**: Bun, Biome, TypeScript
+- **Infraestructura & Edge**: Cloudflare Pages (@opennextjs/cloudflare), Cloudflare R2
 
 ## Instalación
 
-1. **Clonar el Repositorio**: Descarga el código de este proyecto en tu máquina usando Git.
+1. **Clonar el Repositorio**:
 
 ```bash
-git clone https://github.com/Ivandv19/mxwatch.git
+git clone https://github.com/ivndv/mxwatch.git
 ```
 
-2. **Instalar Dependencias**: Abre una terminal en la raíz de tu proyecto y ejecuta el siguiente comando:
+2. **Instalar Dependencias**:
 
 ```bash
 bun install
 ```
 
-3. **Configuración**: Crea un archivo `.env.local` en la raíz del proyecto y configura la variable `NEXT_PUBLIC_API_URL` apuntando a tu instancia del backend para recibir los datos del mapa.
+3. **Variables de Entorno**: Crea un archivo `.env.local` con las credenciales de conexión al backend `mxwatch-api`:
 
-4. **Iniciar el Proyecto**: Enciende y visualiza el tablero de mandos localmente con:
-
-```bash
-bun run dev
+```env
+API_URL=http://localhost:3001
+API_KEY=tu_clave_secreta_aqui
 ```
 
-## Créditos
+4. **Iniciar el Proyecto**:
 
-Este proyecto administra la visualización geográfica central e interactiva para el sistema de mapas.
+```bash
+# Desarrollo local con Next.js:
+bun run dev
 
-- Desarrollado por Ivan Cruz.
+# Preview local con entorno Cloudflare (OpenNext):
+bun run dev:full
+```
 
 ## Despliegue
 
-La aplicación se encuentra estructurada y preparada para exportarse fluidamente mediante infraestructuras como Cloudflare Pages. Puedes visitar el sitio en vivo aquí: [mxwatch.mgdc.site](https://mxwatch.mgdc.site/)
+Desplegado en Cloudflare Pages: [mxwatch.mgdc.site](https://mxwatch.mgdc.site/)
 
 ## Licencia
 

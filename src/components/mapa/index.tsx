@@ -11,9 +11,12 @@ import { obtenerDatosMapa } from "@/actions/mapData";
 // Utilerías y cálculos de estilo del mapa
 import {
 	calcularEstiloCartel,
+	ESTILO_SIN_DATOS,
 	generarIdPatron,
 	obtenerColoresOrdenados,
 } from "@/lib/mapa";
+// Pan/zoom nativo del mapa
+import { useMapView } from "@/lib/useMapView";
 // Store (Zustand)
 import {
 	useAccionesMapa,
@@ -24,7 +27,7 @@ import {
 	useErrorDatosPresencia,
 	useEstadoSeleccionado,
 } from "@/store/mapStore";
-import type { PatronDef, TooltipState } from "@/types/mapa";
+import type { CartelStyle, PatronDef, TooltipState } from "@/types/mapa";
 import {
 	CargandoInicial,
 	CargandoMapaCompleto,
@@ -37,12 +40,6 @@ import TooltipEstrategico from "./TooltipEstrategico";
 
 // Recurso TopoJSON con los límites geográficos de México.
 const geoUrl = "https://assets.mgdc.site/mxwatch/maps/mexico.json";
-
-// Constantes de configuración para la proyección y el zoom.
-const MEXICO_CENTER: [number, number] = [-102.34, 24.01];
-const DEFAULT_ZOOM = 1;
-const MAX_ZOOM = 8;
-const ZOOM_STEP = 1.5;
 
 /**
  * Núcleo interactivo del mapa: renderiza geografía, gestiona zoom y visualiza control territorial.
@@ -63,10 +60,6 @@ export default function MapCanvas() {
 	const errorDatosPresencia = useErrorDatosPresencia();
 
 	// Estado Local: Vista, datos crudos y UI
-	const [position, setPosition] = useState({
-		coordinates: MEXICO_CENTER,
-		zoom: DEFAULT_ZOOM,
-	});
 	const [topoData, setTopoData] = useState<Topology | null>(null);
 	const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 	const [errorMapa, setErrorMapa] = useState<string | null>(null);
@@ -74,6 +67,9 @@ export default function MapCanvas() {
 
 	// Referencia al contenedor del mapa para cálculos de posición
 	const mapContainerRef = useRef<HTMLDivElement>(null);
+	// Vista (pan/zoom) y manejadores de interacción
+	const { view, zoomIn, zoomOut, reset, didDragRef, svgRef, onPointerDown } =
+		useMapView();
 
 	// Carga asíncrona de geometría (TopoJSON) e inteligencia (DB) con AbortController
 	useEffect(() => {
@@ -117,30 +113,6 @@ export default function MapCanvas() {
 		establecerErrorDatosPresencia,
 	]);
 
-	// Handlers de control de cámara (Zoom/Reset)
-	// Acerca el mapa (zoom in)
-	const handleZoomIn = useCallback(
-		() =>
-			setPosition((p) => ({
-				...p,
-				zoom: Math.min((p.zoom || DEFAULT_ZOOM) * ZOOM_STEP, MAX_ZOOM),
-			})),
-		[],
-	);
-	// Aleja el mapa (zoom out)
-	const handleZoomOut = useCallback(
-		() =>
-			setPosition((p) => ({
-				...p,
-				zoom: Math.max((p.zoom || DEFAULT_ZOOM) / ZOOM_STEP, DEFAULT_ZOOM),
-			})),
-		[],
-	);
-	// Restaura posición y zoom inicial
-	const handleReset = useCallback(
-		() => setPosition({ coordinates: MEXICO_CENTER, zoom: DEFAULT_ZOOM }),
-		[],
-	);
 	// Limpia la selección de estado
 	const handleClearSelection = useCallback(
 		() => establecerEstadoSeleccionado(null),
@@ -159,17 +131,17 @@ export default function MapCanvas() {
 			// + = Acercar
 			if (["+", "="].includes(e.key)) {
 				e.preventDefault();
-				handleZoomIn();
+				zoomIn();
 			}
 			// - = Alejar
 			if (["-", "_"].includes(e.key)) {
 				e.preventDefault();
-				handleZoomOut();
+				zoomOut();
 			}
 			// R / 0 = Reset
 			if (["r", "R", "0"].includes(e.key)) {
 				e.preventDefault();
-				handleReset();
+				reset();
 			}
 			// ESC = Limpiar selección
 			if (e.key === "Escape") {
@@ -179,21 +151,33 @@ export default function MapCanvas() {
 		};
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [handleZoomIn, handleZoomOut, handleReset, handleClearSelection]);
+	}, [zoomIn, zoomOut, reset, handleClearSelection]);
 
-	// Calcula el estilo visual de un estado según datos de presencia y selección
+	// Estilos por estado precargados (lookup O(1) en el render)
+	const estilosPorEstado = useMemo(() => {
+		const mapa = new Map<string, CartelStyle>();
+		for (const estado of datosPresencia) {
+			mapa.set(
+				estado.nombre_estado,
+				calcularEstiloCartel(
+					estado.nombre_estado,
+					datosPresencia,
+					cartelSeleccionado,
+					busqueda,
+				),
+			);
+		}
+		return mapa;
+	}, [datosPresencia, cartelSeleccionado, busqueda]);
+
+	// Estilo de un estado por nombre
 	const getCartelStyle = useCallback(
 		(nombreEstado: string) =>
-			calcularEstiloCartel(
-				nombreEstado,
-				datosPresencia,
-				cartelSeleccionado,
-				busqueda,
-			),
-		[cartelSeleccionado, datosPresencia, busqueda],
+			estilosPorEstado.get(nombreEstado) ?? ESTILO_SIN_DATOS,
+		[estilosPorEstado],
 	);
 
-	// Convierte TopoJSON a GeoJSON para react-simple-maps
+	// TopoJSON → GeoJSON para el render
 	const features = useMemo(() => {
 		if (!topoData?.objects?.states) return [];
 		try {
@@ -261,8 +245,10 @@ export default function MapCanvas() {
 					topoData && (
 						<MapaRenderizado
 							features={features}
-							position={position}
-							handleMoveEnd={setPosition}
+							view={view}
+							svgRef={svgRef}
+							didDragRef={didDragRef}
+							onPointerDown={onPointerDown}
 							getCartelStyle={getCartelStyle}
 							selectedState={estadoSeleccionado}
 							setSelectedState={establecerEstadoSeleccionado}
@@ -277,10 +263,10 @@ export default function MapCanvas() {
 				{/* Controles de zoom y atajos */}
 				<IndicadorAtajos />
 				<MapaControles
-					onZoomIn={handleZoomIn}
-					onZoomOut={handleZoomOut}
-					onReset={handleReset}
-					zoom={position.zoom}
+					onZoomIn={zoomIn}
+					onZoomOut={zoomOut}
+					onReset={reset}
+					zoom={view.k}
 				/>
 			</div>
 		</div>

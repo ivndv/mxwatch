@@ -1,6 +1,16 @@
 import type { PresenciaEstado } from "@/schemas/api";
 import type { CartelStyle } from "@/types/mapa";
 
+// Estilo para estados sin datos de presencia
+export const ESTILO_SIN_DATOS: CartelStyle = {
+	fill: "rgba(25, 40, 60, 0.4)",
+	stroke: "rgba(80, 110, 150, 0.4)",
+	strokeWidth: 0.5,
+	cartel: "Sin datos",
+	opacity: 1,
+	liveDataRaw: null,
+};
+
 // Ordena los colores de los cárteles alfabéticamente para generar patrones consistentes
 export function obtenerColoresOrdenados(
 	carteles: Array<{ color: string }>,
@@ -25,14 +35,7 @@ export function calcularEstiloCartel(
 
 	// Estado sin datos: color neutro
 	if (!registro || registro.carteles.length === 0) {
-		return {
-			fill: "rgba(25, 40, 60, 0.4)",
-			stroke: "rgba(80, 110, 150, 0.4)",
-			strokeWidth: 0.5,
-			cartel: "Sin datos",
-			opacity: 1,
-			liveDataRaw: null,
-		};
+		return ESTILO_SIN_DATOS;
 	}
 
 	// Variables de selección y búsqueda

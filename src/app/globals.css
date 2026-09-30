@@ -103,3 +103,16 @@
 	margin-right: 8px;
 	box-shadow: 0 0 8px var(--accent-glow);
 }
+
+/* ── Estados interactivos del mapa (@visx/geo + paths propios) ── */
+.mapa-geography:hover {
+	fill-opacity: 0.8;
+	stroke: white;
+	stroke-width: 2;
+}
+
+.mapa-geography:active {
+	fill-opacity: 0.6;
+	stroke: white;
+	stroke-width: 3;
+}

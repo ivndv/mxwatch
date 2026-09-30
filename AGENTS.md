@@ -36,7 +36,7 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 | **Lenguaje** | **TypeScript** | Modo estricto (`tsconfig.json`) |
 | **Frontend Framework** | **Next.js 16** + **React 19** | App Router (`next ^16.3.4`, `react ^19.3.0`, `react-dom ^19.3.0`) |
 | **Adaptador Edge / Cloudflare** | **@opennextjs/cloudflare** | `^1.20.6` (compilación y ejecución en Cloudflare Pages) |
-| **Visualización Cartográfica** | **react-simple-maps** + **d3-geo** + **topojson-client** | Proyecciones geográficas y renderizado de geometrías SVG de México (`public/maps/mexico.json`) |
+| **Visualización Cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | Proyección `<Mercator>` y paths SVG de los estados; pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
 | **Estilos & UI** | **Tailwind CSS 4** | `@tailwindcss/postcss ^4.3.3`, `tailwindcss ^4.3.3`, tema oscuro táctico |
 | **Animaciones & Virtualización** | **framer-motion** + **react-window** | `framer-motion ^12.43.0`, `react-window ^2.3.1` |
 | **Estado Global** | **Zustand 5** | `zustand ^5.0.15` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
@@ -69,7 +69,7 @@ mxwatch/
 │   │   ├── layout/                → Componentes de estructura global (Navbar.tsx, Footer.tsx)
 │   │   ├── mapa/                  → Componentes visuales del mapa interactivo
 │   │   │   ├── index.tsx          → Contenedor orquestador del mapa
-│   │   │   ├── MapaRenderizado.tsx→ Render SVG interactivo con react-simple-maps
+│   │   │   ├── MapaRenderizado.tsx→ Render SVG interactivo con @visx/geo (<Mercator>)
 │   │   │   ├── MapaControles.tsx  → Zoom, reset y controles flotantes
 │   │   │   ├── TooltipEstrategico.tsx → Tooltip en hover sobre estados
 │   │   │   └── EstadosCarga.tsx   → Skeleton loaders y feedback visual
@@ -88,7 +88,8 @@ mxwatch/
 │   │       └── ErrorAlert.tsx     → Alerta de error con reintento
 │   ├── lib/                       → Lógica de negocio y utilerías
 │   │   ├── api.ts                 → parsearRespuesta y validación runtime
-│   │   └── mapa.ts                → calcularEstiloCartel y patrones SVG dinámicos
+│   │   ├── mapa.ts                → calcularEstiloCartel y patrones SVG dinámicos
+│   │   └── useMapView.ts          → Pan/zoom nativo del mapa (rueda, arrastre, pinch)
 │   ├── schemas/
 │   │   └── api.ts                 → Contratos y esquemas puros de Zod para la API
 │   ├── store/

@@ -32,18 +32,19 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 
 | Capa | Tecnología | Versión / Detalle |
 | :--- | :--- | :--- |
-| **Runtime & Gestor** | **Bun** | `v1.3.x` (`bun.lock`) |
-| **Lenguaje** | **TypeScript** | Modo estricto (`tsconfig.json`) |
-| **Frontend Framework** | **Next.js 16** + **React 19** | App Router (`next ^16.3.4`, `react ^19.3.0`, `react-dom ^19.3.0`) |
-| **Adaptador Edge / Cloudflare** | **@opennextjs/cloudflare** | `^1.20.6` (compilación y ejecución en Cloudflare Pages) |
-| **Visualización Cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | Proyección `<Mercator>` y paths SVG de los estados; pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
+| **Runtime & Gestor** | **Bun** | `v1.4.2` (`bun.lock`) |
+| **Lenguaje** | **TypeScript** | `^7.0.2`, modo estricto (`tsconfig.json`) |
+| **Frontend Framework** | **Next.js 16** + **React 19** | App Router (`next ^16.3.8`, `react ^19.3.0`, `react-dom ^19.3.0`) |
+| **Adaptador Edge / Cloudflare** | **@opennextjs/cloudflare** | `^1.20.7` (compilación y ejecución en Cloudflare Pages) |
+| **Visualización Cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | `@visx/geo ^4.0.0`, `d3-geo ^3.1.1`, `topojson-client ^3.1.0`; proyección `<Mercator>` y pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
 | **Estilos & UI** | **Tailwind CSS 4** | `@tailwindcss/postcss ^4.3.3`, `tailwindcss ^4.3.3`, tema oscuro táctico |
-| **Animaciones & Virtualización** | **framer-motion** + **react-window** | `framer-motion ^12.43.0`, `react-window ^2.3.1` |
+| **Animaciones & Virtualización** | **framer-motion** + **react-window** | `framer-motion ^13.4.6`, `react-window ^2.3.3` |
 | **Estado Global** | **Zustand 5** | `zustand ^5.0.15` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
-| **Validación de Datos** | **Zod 4** | `zod ^4.6.2` (validación runtime en `src/schemas/api.schemas.ts`) |
-| **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.5.13` (`biome.json` con preset `recommended`) |
-| **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.131.0` (`wrangler.jsonc`, OpenNext) |
+| **Validación de Datos** | **Zod 4** | `zod ^4.6.5` (validación runtime en `src/schemas/api.ts`) |
+| **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.5.15` (`biome.json` con preset `recommended`) |
+| **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.145.0` (`wrangler.jsonc`, OpenNext) |
 | **CDN & Almacenamiento de Assets** | **Cloudflare R2** | Bucket `assets-mgdc`, dominio `https://assets.mgdc.site/mxwatch/` (logos, og-image, favicon, TopoJSON) |
+| **CI/CD** | **GitHub Actions** | Composite `./.github/actions/setup` (Bun `1.4.2`, Node `24.19.0`, cache de `node_modules`); lint/test y deploy en `main` |
 
 ---
 
@@ -51,6 +52,9 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 
 ```
 mxwatch/
+├── .github/                       → Automatización (GitHub Actions)
+│   ├── actions/setup/action.yml   → Composite: Node/Bun + cache + install
+│   └── workflows/ci-cd.yml        → lint/test en paralelo + deploy en main
 ├── .open-next/                    → Build artifacts generados por OpenNext
 ├── public/                        → Assets públicos mínimos (_headers)
 ├── src/
@@ -175,7 +179,18 @@ bun run lint      # Corrección automática
 
 ---
 
-## 8. Reglas Críticas para Agentes
+## 8. CI/CD (GitHub Actions)
+
+Flujo: `push`/`PR` a `main`/`develop` → **lint** y **test** en paralelo → **deploy** solo en `push` a `main`.
+
+* Setup centralizado en la composite `./.github/actions/setup` (versiones Node/Bun + cache de `node_modules`).
+* `lint` corre `bun run check` (read-only); `test` corre `bun run test` (placeholder mientras no haya suite).
+* `deploy` compila con OpenNext y despliega en Cloudflare (`bun run deploy`).
+* Hardening: `concurrency` (cancela runs obsoletos del mismo ref) y `permissions: contents: read`.
+
+---
+
+## 9. Reglas Críticas para Agentes
 
 1. **Gestor de Paquetes Exclusivo:** Utiliza siempre **`bun`**. Nunca ejecutes `npm`, `yarn` ni `pnpm`.
 2. **Integridad de Linter:** Ejecuta `bun run lint` o `bun run check` después de modificar archivos para garantizar conformidad con `biome.json`.

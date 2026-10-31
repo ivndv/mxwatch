@@ -1,10 +1,10 @@
 import type { PresenciaEstado } from "@/schemas/api";
 import type { CartelStyle } from "@/types/mapa";
 
-// Estilo para estados sin datos de presencia
+// Estilo para estados sin datos de presencia (los colores cambian con el tema)
 export const ESTILO_SIN_DATOS: CartelStyle = {
-	fill: "rgba(25, 40, 60, 0.4)",
-	stroke: "rgba(80, 110, 150, 0.4)",
+	fill: "var(--map-empty-fill)",
+	stroke: "var(--map-empty-stroke)",
 	strokeWidth: 0.5,
 	cartel: "Sin datos",
 	opacity: 1,
@@ -66,7 +66,9 @@ export function calcularEstiloCartel(
 			const idPatron = generarIdPatron(colores);
 			return {
 				fill: `url(#${idPatron})`,
-				stroke: coincideBusqueda ? "white" : `${colorPrincipal}30`,
+				stroke: coincideBusqueda
+					? "var(--map-highlight)"
+					: `${colorPrincipal}30`,
 				strokeWidth: coincideBusqueda ? 2 : 1,
 				cartel: nombresCarteles,
 				opacity: coincideBusqueda ? 1 : 0.2,
@@ -76,7 +78,7 @@ export function calcularEstiloCartel(
 		// Un solo cártel: color sólido
 		return {
 			fill: coincideBusqueda ? `${colorPrincipal}dd` : `${colorPrincipal}18`,
-			stroke: coincideBusqueda ? "white" : `${colorPrincipal}30`,
+			stroke: coincideBusqueda ? "var(--map-highlight)" : `${colorPrincipal}30`,
 			strokeWidth: coincideBusqueda ? 2 : 1,
 			cartel: nombresCarteles,
 			opacity: coincideBusqueda ? 1 : 0.2,
@@ -94,7 +96,7 @@ export function calcularEstiloCartel(
 			stroke: estaAtenuado
 				? `${colorPrincipal}30`
 				: hayCoincidencia
-					? "white"
+					? "var(--map-highlight)"
 					: colorPrincipal,
 			strokeWidth: hayCoincidencia ? 2 : 1,
 			cartel: nombresCarteles,
@@ -113,7 +115,7 @@ export function calcularEstiloCartel(
 		stroke: estaAtenuado
 			? `${colorPrincipal}30`
 			: hayCoincidencia
-				? "white"
+				? "var(--map-highlight)"
 				: colorPrincipal,
 		strokeWidth: hayCoincidencia ? 2 : 1,
 		cartel: nombresCarteles,

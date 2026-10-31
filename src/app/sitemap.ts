@@ -1,24 +1,36 @@
 import type { MetadataRoute } from "next";
 
 /**
- * Configuración dinámica del sitemap para indexación en buscadores.
- * Define las rutas principales y su prioridad de rastreo.
+ * Sitemap con las rutas en ambos idiomas y sus alternates.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
 	const baseUrl = "https://mxwatch.mgdc.site";
 
-	return [
-		{
-			url: baseUrl, // Página de inicio: máxima prioridad
-			lastModified: new Date(),
-			changeFrequency: "daily",
-			priority: 1,
-		},
-		{
-			url: `${baseUrl}/mapa`, // Mapa interactivo: alta prioridad por contenido dinámico
-			lastModified: new Date(),
-			changeFrequency: "daily",
-			priority: 0.8,
-		},
+	// Par de rutas equivalentes por idioma
+	const rutas = [
+		{ en: "/", es: "/es", priority: 1 },
+		{ en: "/map", es: "/es/mapa", priority: 0.8 },
+		{ en: "/legal/terms", es: "/es/legal/terminos", priority: 0.3 },
+		{ en: "/legal/privacy", es: "/es/legal/privacidad", priority: 0.3 },
 	];
+
+	return rutas.flatMap(({ en, es, priority }) => {
+		const languages = { en: `${baseUrl}${en}`, es: `${baseUrl}${es}` };
+		return [
+			{
+				url: `${baseUrl}${en}`,
+				lastModified: new Date(),
+				changeFrequency: "daily" as const,
+				priority,
+				alternates: { languages },
+			},
+			{
+				url: `${baseUrl}${es}`,
+				lastModified: new Date(),
+				changeFrequency: "daily" as const,
+				priority,
+				alternates: { languages },
+			},
+		];
+	});
 }

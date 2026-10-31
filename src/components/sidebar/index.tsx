@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 // React y Next
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 // Server actions
 import {
 	obtenerCarteles,
@@ -16,6 +15,9 @@ import {
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { ClearButton, SearchIcon } from "@/components/ui/icons";
+import { useLocale } from "@/i18n/LocaleProvider";
+// Traducciones
+import * as m from "@/paraglide/messages";
 // Store (Zustand)
 import {
 	useBusqueda,
@@ -41,6 +43,7 @@ import ResultadosBusqueda from "./ResultadosBusqueda";
 import { SidebarFooter } from "./SidebarFooter";
 
 export default function Sidebar() {
+	const locale = useLocale();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -299,8 +302,8 @@ export default function Sidebar() {
 			<aside
 				className={`
 					fixed md:relative bottom-0 left-0 right-0 z-30
-					md:w-[380px] bg-card border-t md:border-t-0 md:border-r border-white/10
-					flex flex-col shrink-0 shadow-2xl
+					md:w-[348px] bg-card border-t md:border-t-0 md:border-r border-border
+					flex flex-col shrink-0 shadow-lg
 					transition-all duration-300 ease-in-out
 					${sidebarAbierta ? "h-[75vh] md:h-full" : "h-auto md:h-full"}
 				`}
@@ -308,27 +311,30 @@ export default function Sidebar() {
 				{/* Toggle handle para mobile */}
 				<button
 					type="button"
-					className="md:hidden w-full py-1.5 flex items-center justify-center bg-card border-b border-white/5 active:bg-hover transition-colors"
+					className="md:hidden w-full py-1.5 flex items-center justify-center bg-card border-b border-border-subtle active:bg-hover transition-colors"
 					onClick={() => setSidebarAbierta((p) => !p)}
 					aria-label={sidebarAbierta ? "Cerrar panel" : "Abrir panel"}
 				>
 					<div className="w-10 h-1 rounded-full bg-tertiary" />
 				</button>
-				<div className="p-3 md:p-4 border-b border-white/10 bg-surface/50 backdrop-blur-md sticky top-0 z-10">
+				<div className="p-3 md:p-4 border-b border-border bg-card sticky top-0 z-10">
 					{/* Encabezado y barra de búsqueda */}
 					<div className="flex items-center justify-between mb-2 md:mb-3">
-						<h2 className="text-[10px] md:text-sm font-bold tracking-widest uppercase text-primary">
-							Centro de Análisis
+						<h2 className="text-[11px] md:text-sm font-bold tracking-wide uppercase text-primary">
+							{m.sidebar_analysis({}, { locale })}
 						</h2>
-						<InfoTooltip content="Atajos: Foco (Ctrl+F), ESC limpiar, Alt+1-9 selección rápida" />
+						<InfoTooltip content={m.sidebar_shortcuts_hint({}, { locale })} />
 					</div>
 					<div className="relative">
 						<input
 							type="text"
-							placeholder="Buscar estado o cártel..."
+							id="busqueda-mapa"
+							name="busqueda"
+							aria-label={m.sidebar_search_label({}, { locale })}
+							placeholder={m.sidebar_search_placeholder({}, { locale })}
 							value={busqueda}
 							onChange={(e) => establecerBusqueda(e.target.value)}
-							className="w-full bg-input border border-white/20 rounded-lg pl-10 pr-10 py-2 text-sm text-primary placeholder:text-tertiary focus:outline-none focus:border-accent transition-colors"
+							className="w-full bg-input border border-border rounded-md h-9 pl-10 pr-10 text-sm text-primary placeholder:text-tertiary focus:outline-none focus:border-accent transition-colors"
 						/>
 						<SearchIcon />
 						{busqueda && <ClearButton onClick={() => establecerBusqueda("")} />}
@@ -339,7 +345,7 @@ export default function Sidebar() {
 					{/* Tabs de navegación */}
 					{/* Tabs de navegación */}
 					<div
-						className="flex border-b border-white/5 bg-card sticky top-0 z-10"
+						className="flex border-b border-border-subtle bg-card sticky top-0 z-10"
 						role="tablist"
 						aria-label="Secciones de inteligencia"
 					>
@@ -347,18 +353,18 @@ export default function Sidebar() {
 							type="button"
 							role="tab"
 							aria-selected="true"
-							className="flex-1 py-3 text-xs font-bold uppercase tracking-wide text-accent border-b-2 border-accent bg-accent/10"
+							className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wide text-accent border-b-2 border-accent bg-accent/5"
 						>
-							Cárteles
+							{m.sidebar_tab_cartels({}, { locale })}
 						</button>
 						<button
 							type="button"
 							disabled
 							role="tab"
 							aria-selected="false"
-							className="flex-1 py-3 text-xs font-bold uppercase tracking-wide text-tertiary opacity-30 cursor-not-allowed"
+							className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wide text-tertiary opacity-30 cursor-not-allowed"
 						>
-							Incidentes
+							{m.sidebar_tab_incidents({}, { locale })}
 						</button>
 					</div>
 
@@ -373,10 +379,10 @@ export default function Sidebar() {
 									exit={{ opacity: 0, y: -10 }}
 								>
 									{cargandoInteligencia ? (
-										<div className="rounded-xl border border-white/10 bg-white/5 p-8 flex flex-col items-center justify-center">
+										<div className="rounded-lg border border-border bg-elevated p-8 flex flex-col items-center justify-center">
 											<div className="w-8 h-8 border-4 border-accent/20 border-t-accent rounded-full animate-spin mb-4" />
 											<span className="text-xs text-secondary font-mono uppercase tracking-[0.2em]">
-												Leyendo expediente...
+												{m.sidebar_loading_state({}, { locale })}
 											</span>
 										</div>
 									) : errorInteligencia ? (
@@ -412,10 +418,10 @@ export default function Sidebar() {
 									exit={{ opacity: 0, y: -10 }}
 								>
 									{cargandoDetalleCartel ? (
-										<div className="rounded-xl border border-white/10 bg-white/5 p-8 flex flex-col items-center justify-center">
+										<div className="rounded-lg border border-border bg-elevated p-8 flex flex-col items-center justify-center">
 											<div className="w-8 h-8 border-4 border-accent/20 border-t-accent rounded-full animate-spin mb-4" />
 											<span className="text-xs text-secondary font-mono uppercase tracking-[0.2em]">
-												Cargando perfil...
+												{m.sidebar_loading_cartel({}, { locale })}
 											</span>
 										</div>
 									) : errorDetalleCartel ? (

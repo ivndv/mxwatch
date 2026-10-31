@@ -232,7 +232,7 @@ export default function MapCanvas() {
 			<div
 				className="absolute inset-0 flex items-center justify-center bg-surface-alt"
 				style={{
-					backgroundImage: `radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px)`,
+					backgroundImage: `radial-gradient(circle, var(--map-dots) 1px, transparent 1px)`,
 				}}
 			>
 				{/* Tooltip flotante al hacer hover */}

@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 import { CheckIcon } from "@/components/ui/icons";
+import { useLocale } from "@/i18n/LocaleProvider";
+import * as m from "@/paraglide/messages";
 import {
 	useCartelSeleccionado,
 	useDatosPresencia,
@@ -9,6 +11,7 @@ import {
 
 // Leyenda interactiva de cárteles con filtro y selección
 const LeyendaCarteles = React.memo(() => {
+	const locale = useLocale();
 	// Selectores del store
 	const todosCarteles = useTodosCarteles();
 	const cartelSeleccionado = useCartelSeleccionado();
@@ -38,7 +41,7 @@ const LeyendaCarteles = React.memo(() => {
 	if (cartelesFiltrados.length === 0)
 		return (
 			<div className="text-center py-8 text-tertiary text-xs">
-				Sin resultados en el sector
+				{m.legend_empty({}, { locale })}
 			</div>
 		);
 
@@ -46,14 +49,14 @@ const LeyendaCarteles = React.memo(() => {
 		<div className="flex flex-col gap-3">
 			{/* Encabezado con botón de limpiar selección */}
 			<h3 className="text-xs font-bold uppercase text-secondary tracking-wider flex items-center gap-2">
-				Despliegue Territorial
+				{m.legend_title({}, { locale })}
 				{cartelSeleccionado && (
 					<button
 						type="button"
 						onClick={() => alternarCartel(cartelSeleccionado)}
-						className="ml-auto text-[9px] text-accent font-medium"
+						className="ml-auto text-[11px] text-accent font-medium"
 					>
-						Limpiar ×
+						{m.legend_clear({}, { locale })}
 					</button>
 				)}
 			</h3>
@@ -72,17 +75,17 @@ const LeyendaCarteles = React.memo(() => {
 							type="button"
 							key={cartel.id}
 							onClick={() => alternarCartel(cartel.slug || cartel.id)}
-							className={`flex items-center gap-3 p-2 rounded-md transition-all text-left w-full group ${isSelected ? "bg-hover border border-accent/30" : "hover:bg-input border border-transparent"} ${cartelSeleccionado && !isSelected ? "opacity-30" : "opacity-100"}`}
+							className={`flex items-center gap-3 p-2 rounded-md transition-all text-left w-full group ${isSelected ? "bg-accent/5 ring-1 ring-accent/40 border border-transparent" : "hover:bg-hover border border-transparent"} ${cartelSeleccionado && !isSelected ? "opacity-30" : "opacity-100"}`}
 						>
 							<div
-								className="w-3 h-3 rounded-sm shadow-sm"
+								className="w-3 h-3 rounded-[3px] shadow-sm"
 								style={{ backgroundColor: cartel.color }}
 							/>
 							<span className="text-sm font-medium flex-1 truncate text-primary">
 								{cartel.nombre}
 							</span>
 							<span
-								className="text-[10px] font-black px-1.5 py-0.5 rounded-full"
+								className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
 								style={{
 									backgroundColor: `${cartel.color}25`,
 									color: cartel.color,

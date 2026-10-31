@@ -89,10 +89,10 @@ const MapaLayer = React.memo(function MapaLayer({
 			setTooltip({
 				content: nombreEstado,
 				cartel: style.cartel,
-				// Color: stroke o fallback si es blanco
+				// Color: stroke o fallback si es el resaltado neutro del tema
 				color:
-					style.stroke === "white"
-						? (style.liveDataRaw?.color ?? "#8b98b8")
+					style.stroke === "var(--map-highlight)"
+						? (style.liveDataRaw?.color ?? "var(--text-dim)")
 						: style.stroke,
 				x: clientX - rect.left,
 				y: clientY - rect.top,

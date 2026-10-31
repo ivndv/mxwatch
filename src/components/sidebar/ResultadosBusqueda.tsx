@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import * as m from "@/paraglide/messages";
 import {
 	useBusqueda,
 	useDatosPresencia,
@@ -8,6 +10,7 @@ import {
 
 // Resultados de búsqueda filtrados por estado o cártel
 const ResultadosBusqueda = () => {
+	const locale = useLocale();
 	const busqueda = useBusqueda();
 	const datosPresencia = useDatosPresencia();
 	const estadoSeleccionado = useEstadoSeleccionado();
@@ -35,7 +38,7 @@ const ResultadosBusqueda = () => {
 	return (
 		<div className="flex flex-col gap-2">
 			<h3 className="text-xs font-bold uppercase text-secondary tracking-wider">
-				Estados ({estadosFiltrados.length})
+				{m.search_states({ count: estadosFiltrados.length }, { locale })}
 			</h3>
 			{/* Lista de estados coincidentes */}
 			<div className="flex flex-col gap-1">
@@ -54,15 +57,18 @@ const ResultadosBusqueda = () => {
 							}
 							className={`flex items-center gap-3 p-2 rounded-md transition-all text-left w-full group ${
 								esSeleccionado
-									? "bg-hover border border-accent/30"
-									: "hover:bg-input border border-transparent"
+									? "bg-accent/5 ring-1 ring-accent/40 border border-transparent"
+									: "hover:bg-hover border border-transparent"
 							}`}
 						>
 							<span className="text-sm font-medium flex-1 truncate text-primary">
 								{e.nombre_estado}
 							</span>
-							<span className="text-[10px] font-black text-tertiary">
-								{e.carteles.length} cartel(es)
+							<span className="text-[11px] font-bold text-tertiary">
+								{m.search_cartel_count(
+									{ count: e.carteles.length },
+									{ locale },
+								)}
 							</span>
 						</button>
 					);

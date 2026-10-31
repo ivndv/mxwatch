@@ -1,65 +1,133 @@
 @import "tailwindcss";
 
-/* ── Design Tokens: Paleta de colores y variables del sistema ── */
+/* ── Tokens: tema oscuro (predeterminado) ── */
 :root {
-	/* Fondos y Superficies */
-	--bg-dark: #080c12;
-	--bg-card: #0f1520;
-	--bg-input: #161d2b;
-
-	/* Bordes y Separadores */
-	--border-dim: rgba(255, 255, 255, 0.05);
-	--border-light: rgba(255, 255, 255, 0.1);
-	--border-mid: rgba(255, 255, 255, 0.2);
+	/* Superficies */
+	--surface: #080c12;
+	--surface-alt: #05080c;
+	--card: #0f1520;
+	--input: #161d2b;
+	--hover: #1c2636;
+	--elevated: rgba(255, 255, 255, 0.05);
+	--tooltip: #0a0f18;
 
 	/* Tipografía */
 	--text-main: #f0f4ff;
 	--text-dim: #8b98b8;
 	--text-muted: #5e6c8b;
 
-	/* Acento (Rojo Táctico) y Efectos */
+	/* Bordes y rejillas */
+	--border-subtle: rgba(255, 255, 255, 0.05);
+	--border: rgba(255, 255, 255, 0.1);
+	--border-strong: rgba(255, 255, 255, 0.2);
+	--grid-line: rgba(255, 255, 255, 0.2);
+
+	/* Acento táctico y efectos */
 	--accent: #e63946;
 	--accent-hover: #d5303c;
 	--accent-glow: rgba(230, 57, 70, 0.35);
 
-	/* Dimensiones de Layout */
+	/* Mapa: estados sin datos, resaltado y retícula de fondo */
+	--map-empty-fill: rgba(25, 40, 60, 0.4);
+	--map-empty-stroke: rgba(80, 110, 150, 0.4);
+	--map-highlight: #ffffff;
+	--map-dots: rgba(255, 255, 255, 0.15);
+
+	/* Dimensiones de layout */
 	--navbar-h: 64px;
+
+	color-scheme: dark;
+}
+
+/* ── Tokens: tema claro ── */
+html[data-theme="light"] {
+	--surface: #f5f7fa;
+	--surface-alt: #eef1f6;
+	--card: #ffffff;
+	--input: #f1f4f9;
+	--hover: #e8edf5;
+	--elevated: rgba(11, 18, 32, 0.04);
+	--tooltip: #ffffff;
+
+	--text-main: #0b1220;
+	--text-dim: #4b5563;
+	--text-muted: #6b7280;
+
+	--border-subtle: rgba(11, 18, 32, 0.06);
+	--border: rgba(11, 18, 32, 0.1);
+	--border-strong: rgba(11, 18, 32, 0.18);
+	--grid-line: rgba(11, 18, 32, 0.08);
+
+	--accent: #d92d3a;
+	--accent-hover: #c02633;
+	--accent-glow: rgba(217, 45, 58, 0.25);
+
+	--map-empty-fill: rgba(148, 163, 184, 0.35);
+	--map-empty-stroke: rgba(100, 116, 139, 0.5);
+	--map-highlight: #0b1220;
+	--map-dots: rgba(11, 18, 32, 0.12);
+
+	color-scheme: light;
+}
+
+/* Alias heredados: mantienen las reglas existentes sin duplicarlas */
+:root {
+	--bg-dark: var(--surface);
+	--bg-card: var(--card);
+	--bg-input: var(--input);
+	--border-dim: var(--border-subtle);
+	--border-light: var(--border);
+	--border-mid: var(--border-strong);
 }
 
 /* Integración de tokens con el tema de Tailwind CSS v4 */
 @theme inline {
 	--color-accent: var(--accent);
-	--color-surface: #080c12;
-	--color-surface-alt: #05080c;
-	--color-card: #0f1520;
-	--color-input: #161d2b;
-	--color-hover: #1c2636;
-	--color-tooltip: #0a0f18;
-	--color-primary: #f0f4ff;
-	--color-secondary: #8b98b8;
-	--color-tertiary: #5e6c8b;
-	--font-sans: var(--font-inter);
-	--font-mono: var(--font-geist-mono);
+	--color-surface: var(--surface);
+	--color-surface-alt: var(--surface-alt);
+	--color-card: var(--card);
+	--color-input: var(--input);
+	--color-hover: var(--hover);
+	--color-elevated: var(--elevated);
+	--color-tooltip: var(--tooltip);
+	--color-primary: var(--text-main);
+	--color-secondary: var(--text-dim);
+	--color-tertiary: var(--text-muted);
+	--color-border: var(--border);
+	--color-border-subtle: var(--border-subtle);
+	--color-border-strong: var(--border-strong);
+	--font-sans: var(--font-plex-sans);
+	--font-display: var(--font-plex-sans);
+	--font-mono: var(--font-plex-mono);
 }
 
 /* ── Reset y Estilos Base ── */
 @layer base {
 	html {
-		color-scheme: dark;
-		/* Fuerza modo oscuro nativo en UI del navegador */
+		/* El esquema de color lo define el tema activo */
 		scroll-behavior: smooth;
 	}
 
+	/* Los títulos usan la familia display; el resto hereda Manrope */
+	h1,
+	h2 {
+		font-family: var(--font-plex-sans), system-ui, sans-serif;
+	}
+
 	body {
-		background-color: var(--bg-dark);
+		background-color: var(--surface);
 		color: var(--text-main);
-		font-family: var(--font-inter), system-ui, sans-serif;
+		font-family: var(--font-plex-sans), system-ui, sans-serif;
 		-webkit-font-smoothing: antialiased;
 		/* Renderizado de fuente nítido en macOS */
 		-moz-osx-font-smoothing: grayscale;
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
+		/* Evita saltos bruscos al alternar tema */
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease;
 	}
 }
 
@@ -70,11 +138,11 @@
 }
 
 ::-webkit-scrollbar-track {
-	background: var(--bg-dark);
+	background: var(--surface);
 }
 
 ::-webkit-scrollbar-thumb {
-	background: var(--border-mid);
+	background: var(--border-strong);
 	border-radius: 99px;
 }
 
@@ -86,10 +154,10 @@
 
 /* Efecto Glassmorphism para paneles flotantes */
 .glass {
-	background: rgba(8, 12, 18, 0.85);
+	background: color-mix(in srgb, var(--surface) 85%, transparent);
 	backdrop-filter: blur(12px);
 	-webkit-backdrop-filter: blur(12px);
-	border: 1px solid var(--border-light);
+	border: 1px solid var(--border);
 }
 
 /* Indicador visual de estado activo (punto brillante) */
@@ -107,12 +175,12 @@
 /* ── Estados interactivos del mapa (@visx/geo + paths propios) ── */
 .mapa-geography:hover {
 	fill-opacity: 0.8;
-	stroke: white;
+	stroke: var(--map-highlight);
 	stroke-width: 2;
 }
 
 .mapa-geography:active {
 	fill-opacity: 0.6;
-	stroke: white;
+	stroke: var(--map-highlight);
 	stroke-width: 3;
 }

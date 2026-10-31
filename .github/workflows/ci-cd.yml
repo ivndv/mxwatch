@@ -1,4 +1,4 @@
-# MXWatch CI/CD: lint y test en paralelo, deploy solo en push a main
+# MXWatch CI/CD: lint, tipos y build; deploy solo en push a main
 name: MXWatch CI/CD
 
 # Disparadores: pushes y pull requests a las ramas principales
@@ -26,6 +26,7 @@ jobs:
   lint:
     name: Lint & Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       # 1. Clona el repositorio
       - name: Checkout code
@@ -39,10 +40,15 @@ jobs:
       - name: Format & lint check
         run: bun run check
 
-  # Job 2: pruebas (placeholder, sin tests configurados por ahora)
-  test:
-    name: Tests
+      # 4. Verifica que las traducciones estén completas y sin claves huérfanas
+      - name: Translation check
+        run: bun run check:i18n
+
+  # Job 2: verificación de tipos con el compilador de TypeScript
+  typecheck:
+    name: Typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       # 1. Clona el repositorio
       - name: Checkout code
@@ -52,16 +58,35 @@ jobs:
       - name: Setup Bun env
         uses: ./.github/actions/setup
 
-      # 3. Ejecuta la suite de pruebas
-      - name: Run tests
-        run: bun run test
+      # 3. Valida los tipos sin emitir archivos
+      - name: Typecheck
+        run: bun run typecheck
 
-  # Job 3: despliegue en Cloudflare con OpenNext (solo push a main)
+  # Job 3: compila el sitio para detectar errores de build antes de fusionar
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # 1. Clona el repositorio
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # 2. Configura Node, Bun y dependencias con caché
+      - name: Setup Bun env
+        uses: ./.github/actions/setup
+
+      # 3. Compila con Next.js
+      - name: Build Next.js
+        run: bun run build
+
+  # Job 4: despliegue en Cloudflare con OpenNext (solo push a main)
   deploy:
     name: Deploy to Cloudflare
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [lint, test]
+    needs: [lint, typecheck, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       # 1. Clona el repositorio
       - name: Checkout code

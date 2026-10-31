@@ -29,7 +29,7 @@ Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monit
 ## Tecnologías Utilizadas
 
 - **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS 4
-- **Cartografía & Visualización**: react-simple-maps, d3-geo, topojson-client
+- **Cartografía & Visualización**: @visx/geo, d3-geo, topojson-client
 - **Estado Global**: Zustand 5
 - **Validación de Datos**: Zod 4
 - **Herramientas & Linter**: Bun, Biome, TypeScript

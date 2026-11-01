@@ -10,7 +10,7 @@ Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monit
 - **Panel Lateral de Inteligencia**: Barra lateral táctica con buscador en tiempo real para localizar organizaciones, liderazgos y territorios al instante.
 - **Fichas de Análisis por Estado**: Desglose detallado al seleccionar cualquier entidad federativa: organizaciones registradas, nivel de presencia y eventos recientes.
 - **Perfiles de Organizaciones**: Ficha técnica por grupo con liderazgos, zonas de cobertura, alianzas y registros asociados.
-- **Diseño Táctico Optimizado**: Interfaz inmersiva en tema oscuro diseñada para lectura operativa y visualización analítica.
+- **Diseño Táctico Optimizado**: Interfaz inmersiva en tema claro, oscuro o sistema, con lectura operativa y visualización analítica en español e inglés.
 
 ## Secciones
 
@@ -32,48 +32,17 @@ Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monit
 - **Cartografía & Visualización**: @visx/geo, d3-geo, topojson-client
 - **Estado Global**: Zustand 5
 - **Validación de Datos**: Zod 4
+- **Internacionalización**: Paraglide JS 2 (español e inglés)
 - **Herramientas & Linter**: Bun, Biome, TypeScript
-- **Infraestructura & Edge**: Cloudflare Pages (@opennextjs/cloudflare), Cloudflare R2
+- **Infraestructura & Edge**: Cloudflare Workers (@opennextjs/cloudflare), Cloudflare R2
 
-## Instalación
-
-1. **Clonar el Repositorio**:
-
-```bash
-git clone https://github.com/ivndv/mxwatch.git
-```
-
-2. **Instalar Dependencias**:
-
-```bash
-bun install
-```
-
-3. **Variables de Entorno**: Crea un archivo `.env.local` con las credenciales de conexión al backend `mxwatch-api`:
-
-```env
-API_URL=http://localhost:3001
-API_KEY=tu_clave_secreta_aqui
-```
-
-4. **Iniciar el Proyecto**:
-
-```bash
-# Desarrollo local con Next.js:
-bun run dev
-
-# Preview local con entorno Cloudflare (OpenNext):
-bun run dev:full
-```
 
 ## Despliegue
 
-Desplegado en Cloudflare Pages: [mxwatch.mgdc.site](https://mxwatch.mgdc.site/)
+Desplegado en Cloudflare Workers: [MXWatch](https://mxwatch.mgdc.site/)
 
 ## Licencia
 
-Licencia de Uso Personal:
+[PolyForm Noncommercial 1.0.0](LICENSE). Uso personal y no comercial; el uso comercial requiere permiso.
 
-Este software es propiedad de **Ivan Cruz**. Se permite el uso de este software solo para fines personales y no comerciales. No se permite la distribución, modificación ni uso comercial de este software sin el consentimiento expreso de **Ivan Cruz**.
-
-Cualquier uso no autorizado puede resultar en acciones legales.
+© 2026 Ivan Cruz

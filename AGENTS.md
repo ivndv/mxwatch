@@ -10,7 +10,7 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 
 * **Propósito:** Ofrecer un mapa SVG interactivo con renderizado de estados, selector táctico, panel lateral (sidebar) de búsqueda y estadísticas en tiempo real, conectándose a una API backend (`mxwatch-api`) para consumir datos geográficos y reportes de inteligencia.
 * **Dominio en Producción:** [https://mxwatch.mgdc.site/](https://mxwatch.mgdc.site/)
-* **Repositorio:** [https://github.com/Ivandv19/mxwatch](https://github.com/Ivandv19/mxwatch)
+* **Repositorio:** [https://github.com/ivndv/mxwatch](https://github.com/ivndv/mxwatch)
 
 ---
 
@@ -35,9 +35,9 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 | **Runtime & Gestor** | **Bun** | `v1.4.4` (`bun.lock`) |
 | **Lenguaje** | **TypeScript** | `^7.0.2`, modo estricto (`tsconfig.json`) |
 | **Frontend Framework** | **Next.js 16** + **React 19** | App Router (`next ^16.4.3`, `react ^19.3.1`, `react-dom ^19.3.1`) |
-| **Adaptador Edge / Cloudflare** | **@opennextjs/cloudflare** | `^1.20.15` (compilación y ejecución en Cloudflare Pages) |
+| **Adaptador Edge / Cloudflare** | **@opennextjs/cloudflare** | `^1.20.15` (compilación y ejecución en Cloudflare Workers) |
 | **Visualización Cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | `@visx/geo ^4.0.0`, `d3-geo ^3.1.1`, `topojson-client ^3.1.0`; proyección `<Mercator>` y pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
-| **Estilos & UI** | **Tailwind CSS 4** | `@tailwindcss/postcss ^4.3.3`, `tailwindcss ^4.3.3`, tema oscuro táctico |
+| **Estilos & UI** | **Tailwind CSS 4** | `@tailwindcss/postcss ^4.3.3`, `tailwindcss ^4.3.3`, tema claro, oscuro y sistema |
 | **Animaciones & Virtualización** | **framer-motion** + **react-window** | `framer-motion ^14.9.0`, `react-window ^2.5.2` |
 | **Estado Global** | **Zustand 5** | `zustand ^5.0.16` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
 | **Validación de Datos** | **Zod 4** | `zod ^4.6.7` (validación runtime en `src/schemas/api.ts`) |

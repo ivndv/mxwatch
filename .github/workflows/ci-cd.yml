@@ -24,7 +24,7 @@ permissions:
 jobs:
   # Job 1: lint y verificación de formato con Biome
   lint:
-    name: Lint & Format Check
+    name: Biome
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -36,9 +36,9 @@ jobs:
       - name: Setup Bun env
         uses: ./.github/actions/setup
 
-      # 3. Verifica formato y lint con Biome (sin escribir archivos)
-      - name: Format & lint check
-        run: bun run check
+      # 3. Lint y formato en una sola pasada, sin escribir archivos
+      - name: Biome CI
+        run: bunx biome ci .
 
       # 4. Verifica que las traducciones estén completas y sin claves huérfanas
       - name: Translation check

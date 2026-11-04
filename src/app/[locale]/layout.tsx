@@ -163,6 +163,11 @@ export default async function LocaleLayout({
 					</main>
 					<Footer />
 				</LocaleProvider>
+				<Script
+					src="https://static.cloudflareinsights.com/beacon.min.js"
+					data-cf-beacon='{"token":"d6746ded70f946509cb9e045788037e7"}'
+					strategy="afterInteractive"
+				/>
 			</body>
 		</html>
 	);

@@ -1,34 +1,25 @@
-# AGENTS.md — Guía para Agentes en MXWatch
+# AGENTS.md — mxwatch
 
-Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren en el desarrollo, mantenimiento y optimización del frontend interactivo de **MXWatch**.
+Guía operativa y técnica para agentes de IA que colaboran en el desarrollo, mantenimiento y optimización del frontend interactivo de MXWatch.
 
----
-
-## 1. Visión General del Proyecto
+## 1. Visión general
 
 **MXWatch** es un tablero táctico y mapa interactivo diseñado para consultar, visualizar y monitorear datos geográficos, presencia territorial y análisis de inteligencia en todo el territorio mexicano.
 
-* **Propósito:** Ofrecer un mapa SVG interactivo con renderizado de estados, selector táctico, panel lateral (sidebar) de búsqueda y estadísticas en tiempo real, conectándose a una API backend (`mxwatch-api`) para consumir datos geográficos y reportes de inteligencia.
-* **Dominio en Producción:** [https://mxwatch.mgdc.site/](https://mxwatch.mgdc.site/)
-* **Repositorio:** [https://github.com/ivndv/mxwatch](https://github.com/ivndv/mxwatch)
+- **Propósito:** mapa SVG interactivo con renderizado de estados, selector táctico, panel lateral (sidebar) de búsqueda y estadísticas en tiempo real, conectado a la API backend `mxwatch-api` para consumir datos geográficos y reportes de inteligencia.
+- **Dominio en producción:** [https://mxwatch.mgdc.site/](https://mxwatch.mgdc.site/)
+- **Repositorio:** [https://github.com/ivndv/mxwatch](https://github.com/ivndv/mxwatch)
+- **Idiomas:** segmento `[locale]` con diccionarios `en` y `es`.
 
----
+## 2. Antes de tocar código
 
-## 2. Antes de Tocar Código
+**CodeGraph** (índice de símbolos del repo): usa `codegraph_explore` (`query`, `maxFiles`, `projectPath`) antes de un grep masivo o de leer varios archivos; devuelve fuente verbatim, rutas de llamada e impacto.
 
-* **Uso del MCP CodeGraph:** Antes de realizar exploraciones a ciegas o búsquedas masivas de texto, invoca la herramienta `codegraph_explore` para inspeccionar el flujo de llamadas y el código fuente verbatim de los símbolos en una sola llamada eficiente.
-* **Estado y Sincronización:**
-  ```bash
-  # Verificar el estado del índice de CodeGraph
-  codegraph status /home/ivan/software-dev/mxwatch
+- `codegraph sync /home/ivan/software-dev/mxwatch` tras editar, pull o cambiar de rama (incremental, uso normal).
+- `codegraph index /home/ivan/software-dev/mxwatch` solo al crear el índice, tras `codegraph upgrade` o si `status` avisa `built by vX` (rebuild completo).
+- `codegraph status /home/ivan/software-dev/mxwatch` para comprobar el estado.
 
-  # Sincronizar cambios en el árbol de archivos
-  codegraph sync /home/ivan/software-dev/mxwatch
-  ```
-
----
-
-## 3. Stack Tecnológico
+## 3. Stack tecnológico
 
 | Capa | Tecnología | Versión / Detalle |
 | :--- | :--- | :--- |
@@ -36,21 +27,19 @@ Guía operativa y técnica para agentes de Inteligencia Artificial que colaboren
 | **Lenguaje** | **TypeScript** | `^7.0.2`, modo estricto (`tsconfig.json`) |
 | **Frontend Framework** | **Next.js 16** + **React 19** | App Router (`next ^16.4.3`, `react ^19.3.1`, `react-dom ^19.3.1`) |
 | **Adaptador Edge / Cloudflare** | **@opennextjs/cloudflare** | `^1.20.15` (compilación y ejecución en Cloudflare Workers) |
-| **Visualización Cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | `@visx/geo ^4.0.0`, `d3-geo ^3.1.1`, `topojson-client ^3.1.0`; proyección `<Mercator>` y pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
+| **Visualización cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | `@visx/geo ^4.0.0`, `d3-geo ^3.1.1`, `topojson-client ^3.1.0`; proyección `<Mercator>` y pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
 | **Estilos & UI** | **Tailwind CSS 4** | `@tailwindcss/postcss ^4.3.3`, `tailwindcss ^4.3.3`, tema claro, oscuro y sistema |
-| **Animaciones & Virtualización** | **framer-motion** + **react-window** | `framer-motion ^14.9.0`, `react-window ^2.5.2` |
-| **Estado Global** | **Zustand 5** | `zustand ^5.0.16` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
-| **Validación de Datos** | **Zod 4** | `zod ^4.6.7` (validación runtime en `src/schemas/api.ts`) |
+| **Animaciones & virtualización** | **framer-motion** + **react-window** | `framer-motion ^14.9.0`, `react-window ^2.5.2` |
+| **Estado global** | **Zustand 5** | `zustand ^5.0.16` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
+| **Validación de datos** | **Zod 4** | `zod ^4.6.7` (validación runtime en `src/schemas/api.ts`) |
 | **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.6.4` (`biome.json` con preset `recommended`) |
 | **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.156.0` (`wrangler.jsonc`, OpenNext) |
-| **CDN & Almacenamiento de Assets** | **Cloudflare R2** | Bucket `assets-mgdc`, dominio `https://assets.mgdc.site/mxwatch/` (logos, og-image, favicon, TopoJSON) |
+| **CDN & assets** | **Cloudflare R2** | Bucket `assets-mgdc`, dominio `https://assets.mgdc.site/mxwatch/` (logos, og-image, favicon, TopoJSON) |
 | **CI/CD** | **GitHub Actions** | Composite `./.github/actions/setup` (Bun `1.4.4`, Node `24.22.1`, cache de `node_modules`, `--frozen-lockfile`); lint, typecheck, build y traducciones; deploy en `main` |
 
----
+## 4. Estructura del código
 
-## 4. Estructura del Código
-
-```
+```plaintext
 mxwatch/
 ├── .github/                       → Automatización (GitHub Actions)
 │   ├── actions/setup/action.yml   → Composite: Node/Bun + cache + install
@@ -87,11 +76,9 @@ mxwatch/
 └── package.json                   → Dependencias y scripts de Bun
 ```
 
----
+## 5. Arquitectura y flujo de datos
 
-## 5. Arquitectura y Flujo de Datos
-
-```
+```plaintext
 [ mxwatch-api (Backend Hono / PostgreSQL / Dokploy) ]
                       ▲
                       │  HTTP (headers: { "x-api-key": API_KEY })
@@ -113,24 +100,20 @@ mxwatch/
    - Consumen los endpoints de la API (`/api/map`, `/api/cartels`, `/api/cartel/:slug`, `/api/state/:name`).
    - Envían el header secreto `x-api-key` configurado en `API_KEY`.
    - Validan cada respuesta contra los esquemas de Zod antes de entregar datos al frontend.
-2. **Consumo en Cliente:**
-   - La vista (`src/app/[locale]/map/page.tsx`) hidrata el store de Zustand con los datos validados.
+2. **Consumo en cliente:**
+   - La vista `src/app/[locale]/map/page.tsx` hidrata el store de Zustand con los datos validados.
    - `MapaRenderizado.tsx` proyecta el TopoJSON y colorea los estados según su nivel de presencia.
 
----
-
-## 6. Variables de Entorno
+## 6. Variables de entorno
 
 Configuradas en `.env.local` (local) o en las variables de entorno de Cloudflare Pages (producción):
 
 | Variable | Tipo | Descripción |
 | :--- | :--- | :--- |
-| `API_URL` | Privada (Servidor) | URL base del backend `mxwatch-api` (ej: `http://localhost:3001` o `https://mxwatch-api.fluxdv.icu`). |
-| `API_KEY` | Privada (Servidor) | Token secreto para autenticar peticiones server-to-server con `mxwatch-api`. |
+| `API_URL` | Privada (servidor) | URL base del backend `mxwatch-api` (ej.: `http://localhost:3001` o `https://mxwatch-api.fluxdv.icu`). |
+| `API_KEY` | Privada (servidor) | Token secreto para autenticar peticiones server-to-server con `mxwatch-api`. |
 
----
-
-## 7. Comandos Operativos (Bun)
+## 7. Comandos
 
 ```bash
 # Desarrollo local con Next.js
@@ -160,28 +143,34 @@ bun run i18n
 # Verifica que las traducciones estén completas
 bun run check:i18n
 
-# Linter y Formato con Biome
-bun run check     # Diagnóstico (biome ci, read-only)
-bun run lint      # Corrección automática
+# Linter y formato con Biome: diagnóstico (biome ci, read-only)
+bun run check
+
+# Linter y formato con Biome: corrección automática
+bun run lint
 ```
 
----
+## 8. Convenciones y reglas críticas
 
-## 8. CI/CD (GitHub Actions)
+- **Gestor de paquetes exclusivo:** usa siempre **`bun`**. Nunca ejecutes `npm`, `yarn` ni `pnpm`.
+- **Integridad del linter:** ejecuta `bun run lint` o `bun run check` después de modificar archivos para garantizar conformidad con `biome.json`.
+- **Secreto de API:** `API_KEY` es privada del servidor. Las llamadas a `mxwatch-api` pasan por Server Actions; nunca expongas la clave al cliente.
+- **Contratos de datos:** toda respuesta nueva de la API debe validarse con Zod antes de hidratar el store.
+- **Traducciones:** mantén `messages/en.json` y `messages/es.json` completos; CI ejecuta `bun run check:i18n`.
+
+## 9. Flujo de Git y despliegue
+
+- **Prohibido realizar `git commit` o `git push` sin la confirmación y aprobación explícita del usuario.**
+- **Ramas:** el desarrollo se realiza en `develop`; el merge a `main` solo se hace con aprobación explícita y es el que dispara el despliegue.
+- **Mensajes de commit:** Conventional Commits en minúsculas y español (`feat: ...`, `fix: ...`, `chore: ...`, `docs: ...`, `refactor: ...`).
+- **Despliegue:** en `main` se compila con OpenNext y se publica en Cloudflare (`bun run deploy`).
+
+## 10. CI/CD
 
 Flujo: `push`/`PR` a `main`/`develop` → **lint**, **typecheck** y **build** en paralelo → **deploy** solo en `push` a `main`.
 
-* Setup centralizado en la composite `./.github/actions/setup` (versiones Node/Bun + cache de `node_modules` + `--frozen-lockfile`).
-* `lint` corre `bun run check` (`biome ci`, read-only), `typecheck` corre `tsc --noEmit` y `build` compila con Next.js para detectar errores antes de fusionar.
-* `lint` ejecuta además `bun run check:i18n` para validar que las traducciones estén completas.
-* `deploy` compila con OpenNext y despliega en Cloudflare (`bun run deploy`).
-* Hardening: `concurrency` (cancela runs obsoletos del mismo ref) y `permissions: contents: read`.
-
----
-
-## 9. Reglas Críticas para Agentes
-
-1. **Gestor de Paquetes Exclusivo:** Utiliza siempre **`bun`**. Nunca ejecutes `npm`, `yarn` ni `pnpm`.
-2. **Integridad de Linter:** Ejecuta `bun run lint` o `bun run check` después de modificar archivos para garantizar conformidad con `biome.json`.
-3. **Flujo de Git:** **NO realices `git commit` ni `git push` sin la confirmación explícita del usuario**.
-4. **Sincronización de CodeGraph:** Tras crear o renombrar archivos, ejecuta `codegraph sync /home/ivan/software-dev/mxwatch` para mantener actualizado el grafo de símbolos.
+- Setup centralizado en la composite `./.github/actions/setup` (versiones Node/Bun + cache de `node_modules` + `--frozen-lockfile`).
+- `lint` corre `bun run check` (`biome ci`, read-only); además ejecuta `bun run check:i18n` para validar que las traducciones estén completas.
+- `typecheck` corre `tsc --noEmit` y `build` compila con Next.js para detectar errores antes de fusionar.
+- `deploy` compila con OpenNext y despliega en Cloudflare (`bun run deploy`).
+- Hardening: `concurrency` (cancela runs obsoletos del mismo ref) y `permissions: contents: read`.

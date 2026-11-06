@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "assets.mgdc.site",
+				hostname: "assets.liuma.app",
 			},
 		],
 	},

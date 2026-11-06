@@ -41,7 +41,7 @@ export default function Navbar() {
 					aria-label="mxwatch — home"
 				>
 					<Image
-						src="https://assets.mgdc.site/mxwatch/logo.png"
+						src="https://assets.liuma.app/mxwatch/logo.png"
 						alt="MxWatch Logo"
 						width={30}
 						height={30}

@@ -21,7 +21,7 @@ Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monit
 
 ## Uso
 
-- **Acceder a la Plataforma**: Explora el tablero en vivo directamente aquí: [MXWatch](https://mxwatch.mgdc.site/).
+- **Acceder a la Plataforma**: Explora el tablero en vivo directamente aquí: [MXWatch](https://mxwatch.liuma.app/).
 - **Navegar por el Mapa**: Haz clic en cualquier estado de la República Mexicana para desplegar su ficha de inteligencia y organizaciones presentes.
 - **Filtrar por Organización**: Usa el buscador del panel lateral para resaltar los estados donde opera una organización específica y consultar su estructura.
 - **Controles de Mapa**: Utiliza los controles flotantes para acercar, alejar o restablecer la vista panorámica del territorio.
@@ -39,7 +39,7 @@ Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monit
 
 ## Despliegue
 
-Desplegado en Cloudflare Workers: [MXWatch](https://mxwatch.mgdc.site/)
+Desplegado en Cloudflare Workers: [MXWatch](https://mxwatch.liuma.app/)
 
 ## Licencia
 

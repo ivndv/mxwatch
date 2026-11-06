@@ -4,7 +4,7 @@ import type { MetadataRoute } from "next";
  * Sitemap con las rutas en ambos idiomas y sus alternates.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl = "https://mxwatch.mgdc.site";
+	const baseUrl = "https://mxwatch.liuma.app";
 
 	// Par de rutas equivalentes por idioma
 	const rutas = [

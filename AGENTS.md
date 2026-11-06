@@ -7,7 +7,7 @@ Guía operativa y técnica para agentes de IA que colaboran en el desarrollo, ma
 **MXWatch** es un tablero táctico y mapa interactivo diseñado para consultar, visualizar y monitorear datos geográficos, presencia territorial y análisis de inteligencia en todo el territorio mexicano.
 
 - **Propósito:** mapa SVG interactivo con renderizado de estados, selector táctico, panel lateral (sidebar) de búsqueda y estadísticas en tiempo real, conectado a la API backend `mxwatch-api` para consumir datos geográficos y reportes de inteligencia.
-- **Dominio en producción:** [https://mxwatch.mgdc.site/](https://mxwatch.mgdc.site/)
+- **Dominio en producción:** [https://mxwatch.liuma.app/](https://mxwatch.liuma.app/)
 - **Repositorio:** [https://github.com/ivndv/mxwatch](https://github.com/ivndv/mxwatch)
 - **Idiomas:** segmento `[locale]` con diccionarios `en` y `es`.
 
@@ -34,7 +34,7 @@ Guía operativa y técnica para agentes de IA que colaboran en el desarrollo, ma
 | **Validación de datos** | **Zod 4** | `zod ^4.6.7` (validación runtime en `src/schemas/api.ts`) |
 | **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.6.4` (`biome.json` con preset `recommended`) |
 | **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.156.0` (`wrangler.jsonc`, OpenNext) |
-| **CDN & assets** | **Cloudflare R2** | Bucket `assets-mgdc`, dominio `https://assets.mgdc.site/mxwatch/` (logos, og-image, favicon, TopoJSON) |
+| **CDN & assets** | **Cloudflare R2** | Bucket `assets-mgdc`, dominio `https://assets.liuma.app/mxwatch/` (logos, og-image, favicon, TopoJSON) |
 | **CI/CD** | **GitHub Actions** | Composite `./.github/actions/setup` (Bun `1.4.4`, Node `24.22.1`, cache de `node_modules`, `--frozen-lockfile`); lint, typecheck, build y traducciones; deploy en `main` |
 
 ## 4. Estructura del código
@@ -110,7 +110,7 @@ Configuradas en `.env.local` (local) o en las variables de entorno de Cloudflare
 
 | Variable | Tipo | Descripción |
 | :--- | :--- | :--- |
-| `API_URL` | Privada (servidor) | URL base del backend `mxwatch-api` (ej.: `http://localhost:3001` o `https://mxwatch-api.fluxdv.icu`). |
+| `API_URL` | Privada (servidor) | URL base del backend `mxwatch-api` (ej.: `http://localhost:3001` o `https://mxwatch-api.liuma.app`). |
 | `API_KEY` | Privada (servidor) | Token secreto para autenticar peticiones server-to-server con `mxwatch-api`. |
 
 ## 7. Comandos

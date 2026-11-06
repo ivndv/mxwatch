@@ -39,7 +39,7 @@ import MapaRenderizado from "./MapaRenderizado";
 import TooltipEstrategico from "./TooltipEstrategico";
 
 // Recurso TopoJSON con los límites geográficos de México.
-const geoUrl = "https://assets.mgdc.site/mxwatch/maps/mexico.json";
+const geoUrl = "https://assets.liuma.app/mxwatch/maps/mexico.json";
 
 /**
  * Núcleo interactivo del mapa: renderiza geografía, gestiona zoom y visualiza control territorial.

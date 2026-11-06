@@ -52,7 +52,7 @@ export async function generateMetadata({
 			: "Plataforma interactiva para visualizar el control territorial de los cárteles y eventos de seguridad en toda la República Mexicana.";
 
 	return {
-		metadataBase: new URL("https://mxwatch.mgdc.site"),
+		metadataBase: new URL("https://mxwatch.liuma.app"),
 		title: titulo,
 		description: descripcion,
 		keywords: [
@@ -63,7 +63,7 @@ export async function generateMetadata({
 			"crimen organizado",
 			"visualización territorial",
 		],
-		icons: { icon: "https://assets.mgdc.site/mxwatch/favicon.png" },
+		icons: { icon: "https://assets.liuma.app/mxwatch/favicon.png" },
 		alternates: {
 			canonical: l === "en" ? "/" : "/es",
 			languages: { en: "/", es: "/es" },
@@ -73,12 +73,12 @@ export async function generateMetadata({
 			description: descripcion,
 			url:
 				l === "en"
-					? "https://mxwatch.mgdc.site/"
-					: "https://mxwatch.mgdc.site/es",
+					? "https://mxwatch.liuma.app/"
+					: "https://mxwatch.liuma.app/es",
 			siteName: "mxwatch",
 			images: [
 				{
-					url: "https://assets.mgdc.site/mxwatch/og-image.png",
+					url: "https://assets.liuma.app/mxwatch/og-image.png",
 					width: 1200,
 					height: 630,
 				},
@@ -91,7 +91,7 @@ export async function generateMetadata({
 			title: titulo,
 			description: descripcion,
 			creator: "@mxwatch",
-			images: ["https://assets.mgdc.site/mxwatch/og-image.png"],
+			images: ["https://assets.liuma.app/mxwatch/og-image.png"],
 		},
 	};
 }
@@ -115,8 +115,8 @@ export default async function LocaleLayout({
 		description: m.landing_subtitle({}, { locale }),
 		url:
 			locale === "en"
-				? "https://mxwatch.mgdc.site/"
-				: "https://mxwatch.mgdc.site/es",
+				? "https://mxwatch.liuma.app/"
+				: "https://mxwatch.liuma.app/es",
 		applicationCategory: "PublicInformation",
 		genre: "Security & Analysis",
 		browserRequirements: "Requires JavaScript",
@@ -140,7 +140,7 @@ export default async function LocaleLayout({
 
 				{/* Analytics respetuoso con la privacidad (Umami) */}
 				<Script
-					src="https://umami.fluxdv.icu/script.js"
+					src="https://umami.liuma.app/script.js"
 					data-website-id="7d9d6a44-ae40-4784-894d-0509fda3ac05"
 					strategy="afterInteractive"
 				/>

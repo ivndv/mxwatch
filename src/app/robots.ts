@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
 			userAgent: "*", // Aplica a todos los motores de búsqueda
 			allow: "/", // Permite el rastreo completo del sitio
 		},
-		sitemap: "https://mxwatch.mgdc.site/sitemap.xml", // Ubicación del sitemap para indexación eficiente
+		sitemap: "https://mxwatch.liuma.app/sitemap.xml", // Ubicación del sitemap para indexación eficiente
 	};
 }

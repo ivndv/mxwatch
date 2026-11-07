@@ -1,30 +1,38 @@
 import React, { useMemo } from "react";
 import { CheckIcon } from "@/components/ui/icons";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { normalizarTexto } from "@/lib/mapa";
+import { useCarteles, usePresencia } from "@/lib/useMapaQueries";
 import * as m from "@/paraglide/messages";
-import {
-	useCartelSeleccionado,
-	useDatosPresencia,
-	useMapStore,
-	useTodosCarteles,
-} from "@/store/mapStore";
+import { useCartelSeleccionado, useMapStore } from "@/store/mapStore";
 
 // Leyenda interactiva de cárteles con filtro y selección
 const LeyendaCarteles = React.memo(() => {
 	const locale = useLocale();
-	// Selectores del store
-	const todosCarteles = useTodosCarteles();
+	// Estado del servidor y selección
+	const { data: todosCarteles = [] } = useCarteles();
+	const { data: datosPresencia = [] } = usePresencia();
 	const cartelSeleccionado = useCartelSeleccionado();
-	const datosPresencia = useDatosPresencia();
 	const alternarCartel = useMapStore((s) => s.alternarCartel);
+	const establecerEstadoSeleccionado = useMapStore(
+		(s) => s.establecerEstadoSeleccionado,
+	);
+	const establecerBusqueda = useMapStore((s) => s.establecerBusqueda);
 	const busqueda = useMapStore((s) => s.busqueda);
+
+	// Selecciona el cártel y limpia búsqueda/estado
+	const seleccionarCartel = (id: string, yaSeleccionado: boolean) => {
+		alternarCartel(id);
+		if (yaSeleccionado) return;
+		establecerEstadoSeleccionado(null);
+		establecerBusqueda("");
+	};
 
 	// Filtra cárteles por texto de búsqueda
 	const cartelesFiltrados = useMemo(() => {
 		if (!busqueda) return todosCarteles;
-		return todosCarteles.filter((c) =>
-			c.nombre.toLowerCase().includes(busqueda.toLowerCase()),
-		);
+		const q = normalizarTexto(busqueda);
+		return todosCarteles.filter((c) => normalizarTexto(c.nombre).includes(q));
 	}, [todosCarteles, busqueda]);
 
 	// Cuenta en cuántos estados tiene presencia cada cártel
@@ -40,21 +48,21 @@ const LeyendaCarteles = React.memo(() => {
 
 	if (cartelesFiltrados.length === 0)
 		return (
-			<div className="text-center py-8 text-tertiary text-xs">
+			<div className="text-center py-6 text-tertiary text-[13px]">
 				{m.legend_empty({}, { locale })}
 			</div>
 		);
 
 	return (
-		<div className="flex flex-col gap-3">
+		<div className="flex flex-col gap-2">
 			{/* Encabezado con botón de limpiar selección */}
-			<h3 className="text-xs font-bold uppercase text-secondary tracking-wider flex items-center gap-2">
+			<h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-tertiary flex items-center gap-2">
 				{m.legend_title({}, { locale })}
 				{cartelSeleccionado && (
 					<button
 						type="button"
 						onClick={() => alternarCartel(cartelSeleccionado)}
-						className="ml-auto text-[11px] text-accent font-medium"
+						className="ml-auto text-[11px] font-medium text-tertiary hover:text-primary transition-colors"
 					>
 						{m.legend_clear({}, { locale })}
 					</button>
@@ -62,7 +70,7 @@ const LeyendaCarteles = React.memo(() => {
 			</h3>
 
 			{/* Lista de cárteles */}
-			<div className="flex flex-col gap-1.5">
+			<div className="flex flex-col gap-0.5">
 				{cartelesFiltrados.map((cartel) => {
 					const isSelected =
 						cartelSeleccionado === cartel.id ||
@@ -74,26 +82,30 @@ const LeyendaCarteles = React.memo(() => {
 						<button
 							type="button"
 							key={cartel.id}
-							onClick={() => alternarCartel(cartel.slug || cartel.id)}
-							className={`flex items-center gap-3 p-2 rounded-md transition-all text-left w-full group ${isSelected ? "bg-accent/5 ring-1 ring-accent/40 border border-transparent" : "hover:bg-hover border border-transparent"} ${cartelSeleccionado && !isSelected ? "opacity-30" : "opacity-100"}`}
+							onClick={() =>
+								seleccionarCartel(cartel.slug || cartel.id, isSelected)
+							}
+							className={`relative flex items-center gap-3 px-2.5 min-h-11 rounded-lg transition-colors text-left w-full ${
+								isSelected ? "bg-elevated" : "hover:bg-hover"
+							} ${cartelSeleccionado && !isSelected ? "opacity-40" : "opacity-100"}`}
 						>
-							<div
-								className="w-3 h-3 rounded-[3px] shadow-sm"
+							{isSelected && (
+								<span
+									aria-hidden="true"
+									className="absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full bg-accent"
+								/>
+							)}
+							<span
+								className="w-2.5 h-2.5 rounded-full shrink-0"
 								style={{ backgroundColor: cartel.color }}
 							/>
 							<span className="text-sm font-medium flex-1 truncate text-primary">
 								{cartel.nombre}
 							</span>
-							<span
-								className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
-								style={{
-									backgroundColor: `${cartel.color}25`,
-									color: cartel.color,
-								}}
-							>
+							<span className="font-mono text-[11px] text-tertiary tabular-nums">
 								{count}
 							</span>
-							{isSelected && <CheckIcon color={cartel.color} />}
+							{isSelected && <CheckIcon color="var(--accent)" />}
 						</button>
 					);
 				})}

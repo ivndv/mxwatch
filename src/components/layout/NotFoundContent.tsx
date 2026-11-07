@@ -9,42 +9,43 @@ import { type Locale, localizeHref } from "@/paraglide/runtime";
  */
 export default function NotFoundContent({ locale }: { locale: Locale }) {
 	return (
-		<main className="relative w-full flex flex-col items-center justify-center min-h-[calc(100dvh-64px)] px-8 text-center py-20 overflow-hidden bg-surface">
-			{/* Efectos de iluminación de fondo para consistencia visual */}
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl aspect-square opacity-[0.03] pointer-events-none rounded-full bg-primary blur-3xl z-0" />
-			<div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-accent opacity-[0.06] blur-[120px] pointer-events-none rounded-full z-0" />
+		<main className="relative w-full flex flex-col items-center justify-center min-h-[calc(100dvh-64px)] px-6 text-center py-24 overflow-hidden bg-surface">
+			{/* Retícula de puntos con desvanecido radial */}
+			<div
+				className="absolute inset-0 bg-dots pointer-events-none"
+				aria-hidden
+			/>
 
 			<div className="relative z-10 flex flex-col items-center">
-				{/* Badge de estado: Notificación de error */}
+				{/* Badge de estado: notificación de error */}
 				<div
 					role="alert"
-					className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-4 py-1.5 text-xs font-semibold tracking-wide uppercase text-accent shadow-sm backdrop-blur-md"
+					className="mb-6 inline-flex items-center gap-2 rounded-full border border-border-subtle bg-elevated px-4 py-1.5 text-[10px] font-semibold tracking-[0.16em] uppercase text-tertiary"
 				>
-					<span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent-glow)]" />
+					<span className="h-1.5 w-1.5 rounded-full bg-accent" />
 					{m.notfound_badge({}, { locale })}
 				</div>
 
-				{/* Mensaje principal con temática de "cobertura" */}
-				<h1 className="max-w-4xl text-5xl font-bold tracking-tight sm:text-7xl text-primary leading-tight">
-					{m.notfound_title_1({}, { locale })}
-					<br className="sm:hidden" />
-					<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#f47e86]">
+				{/* Mensaje principal con temática de cobertura */}
+				<h1 className="max-w-4xl text-4xl font-semibold tracking-tighter sm:text-6xl text-primary leading-[1.05] text-balance">
+					{m.notfound_title_1({}, { locale })}{" "}
+					<span className="text-accent">
 						{m.notfound_title_2({}, { locale })}
 					</span>
 				</h1>
 
-				<p className="mt-6 max-w-lg text-lg leading-relaxed text-secondary font-medium">
+				<p className="mt-6 max-w-lg text-base sm:text-lg leading-relaxed text-secondary">
 					{m.notfound_body({}, { locale })}
 				</p>
 
-				{/* Opciones de navegación: Retorno al inicio o al mapa */}
-				<div className="mt-12 flex flex-col sm:flex-row gap-4">
+				{/* Opciones de navegación: inicio o mapa */}
+				<div className="mt-10 flex flex-col sm:flex-row gap-3">
 					<Link
 						href={localizeHref("/", { locale })}
-						className="group relative inline-flex h-12 md:h-14 items-center justify-center rounded-lg bg-accent px-8 text-base font-semibold text-white transition-all hover:bg-accent-hover hover:-translate-y-0.5 shadow-[0_0_30px_-10px_var(--accent-glow)]"
+						className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-accent px-7 text-sm font-semibold text-white transition-colors hover:bg-accent-hover shadow-card"
 					>
 						<svg
-							className="mr-2 h-5 w-5 transition-transform group-hover:-translate-x-1"
+							className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -61,22 +62,12 @@ export default function NotFoundContent({ locale }: { locale: Locale }) {
 					</Link>
 					<Link
 						href={localizeHref("/map", { locale })}
-						className="inline-flex h-12 md:h-14 items-center justify-center rounded-lg border border-border bg-elevated px-8 text-base font-semibold text-primary transition-all hover:bg-hover"
+						className="inline-flex h-12 items-center justify-center rounded-full border border-border-subtle bg-elevated px-7 text-sm font-medium text-primary transition-colors hover:bg-hover"
 					>
 						{m.notfound_map({}, { locale })}
 					</Link>
 				</div>
 			</div>
-
-			{/* Rejilla táctica de fondo para ambientación */}
-			<div
-				className="absolute inset-0 opacity-[0.02] pointer-events-none"
-				style={{
-					backgroundImage:
-						"linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",
-					backgroundSize: "40px 40px",
-				}}
-			/>
 		</main>
 	);
 }

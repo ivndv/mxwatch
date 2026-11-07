@@ -1,79 +1,161 @@
 import { useMemo } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { clasificarBusqueda, normalizarTexto } from "@/lib/mapa";
+import { useCarteles, usePresencia } from "@/lib/useMapaQueries";
 import * as m from "@/paraglide/messages";
+import type { CartelBasico } from "@/schemas/api";
 import {
 	useBusqueda,
-	useDatosPresencia,
+	useCartelSeleccionado,
 	useEstadoSeleccionado,
 	useMapStore,
 } from "@/store/mapStore";
 
-// Resultados de búsqueda filtrados por estado o cártel
+// Resultados de búsqueda agrupados por estado y cártel
 const ResultadosBusqueda = () => {
 	const locale = useLocale();
 	const busqueda = useBusqueda();
-	const datosPresencia = useDatosPresencia();
+	const { data: datosPresencia = [] } = usePresencia();
+	const { data: todosCarteles = [] } = useCarteles();
 	const estadoSeleccionado = useEstadoSeleccionado();
+	const cartelSeleccionado = useCartelSeleccionado();
 	const establecerEstadoSeleccionado = useMapStore(
 		(s) => s.establecerEstadoSeleccionado,
 	);
+	const establecerCartelSeleccionado = useMapStore(
+		(s) => s.establecerCartelSeleccionado,
+	);
+	const establecerBusqueda = useMapStore((s) => s.establecerBusqueda);
 
-	// Filtra estados por nombre o cártel coincidente
-	const estadosFiltrados = useMemo(() => {
-		if (!busqueda) return [];
-		const q = busqueda.toLowerCase();
-		return datosPresencia.filter(
-			(e) =>
-				e.nombre_estado.toLowerCase().includes(q) ||
-				e.carteles.some(
-					(c) =>
-						c.nombre.toLowerCase().includes(q) ||
-						c.slug.toLowerCase().includes(q),
-				),
+	// Los estados tienen prioridad; si no hay, busca por cártel
+	const clasificacion = useMemo(
+		() => clasificarBusqueda(datosPresencia, busqueda),
+		[datosPresencia, busqueda],
+	);
+	const estados = clasificacion.estados;
+
+	const carteles = useMemo(() => {
+		const q = normalizarTexto(busqueda.trim());
+		if (!q) return [];
+		return todosCarteles.filter(
+			(cartel) =>
+				normalizarTexto(cartel.nombre).includes(q) ||
+				normalizarTexto(cartel.slug).includes(q),
 		);
-	}, [datosPresencia, busqueda]);
+	}, [todosCarteles, busqueda]);
 
-	if (!busqueda || estadosFiltrados.length === 0) return null;
+	if (!busqueda) return null;
+
+	const seleccionarEstado = (nombreEstado: string) => {
+		const yaSeleccionado = estadoSeleccionado === nombreEstado;
+		establecerEstadoSeleccionado(yaSeleccionado ? null : nombreEstado);
+		if (yaSeleccionado) return;
+		establecerCartelSeleccionado(null);
+		establecerBusqueda("");
+	};
+
+	const seleccionarCartel = (cartel: CartelBasico) => {
+		establecerEstadoSeleccionado(null);
+		establecerCartelSeleccionado(cartel.slug);
+		establecerBusqueda("");
+	};
+
+	const contarPresencia = (cartel: CartelBasico) =>
+		datosPresencia.filter((estado) =>
+			estado.carteles.some((c) => c.slug === cartel.slug || c.id === cartel.id),
+		).length;
 
 	return (
-		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-bold uppercase text-secondary tracking-wider">
-				{m.search_states({ count: estadosFiltrados.length }, { locale })}
-			</h3>
-			{/* Lista de estados coincidentes */}
-			<div className="flex flex-col gap-1">
-				{estadosFiltrados.map((e) => {
-					const esSeleccionado = estadoSeleccionado === e.nombre_estado;
-					return (
-						<button
-							type="button"
-							key={e.slug_estado}
-							onClick={() =>
-								establecerEstadoSeleccionado(
-									estadoSeleccionado === e.nombre_estado
-										? null
-										: e.nombre_estado,
-								)
-							}
-							className={`flex items-center gap-3 p-2 rounded-md transition-all text-left w-full group ${
-								esSeleccionado
-									? "bg-accent/5 ring-1 ring-accent/40 border border-transparent"
-									: "hover:bg-hover border border-transparent"
-							}`}
-						>
-							<span className="text-sm font-medium flex-1 truncate text-primary">
-								{e.nombre_estado}
-							</span>
-							<span className="text-[11px] font-bold text-tertiary">
-								{m.search_cartel_count(
-									{ count: e.carteles.length },
-									{ locale },
-								)}
-							</span>
-						</button>
-					);
-				})}
-			</div>
+		<div className="flex flex-col gap-5">
+			{estados.length === 0 && carteles.length === 0 && (
+				<p className="text-[13px] text-tertiary text-center py-6">
+					{m.search_no_results({ query: busqueda }, { locale })}
+				</p>
+			)}
+
+			{estados.length > 0 && (
+				<section className="flex flex-col gap-2">
+					<h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-tertiary">
+						{m.search_states({ count: estados.length }, { locale })}
+					</h3>
+					<div className="flex flex-col gap-0.5">
+						{estados.map((e) => {
+							const esSeleccionado = estadoSeleccionado === e.nombre_estado;
+							return (
+								<button
+									type="button"
+									key={e.slug_estado}
+									onClick={() => seleccionarEstado(e.nombre_estado)}
+									className={`relative flex items-center gap-3 px-2.5 min-h-11 rounded-lg transition-colors text-left w-full ${
+										esSeleccionado ? "bg-elevated" : "hover:bg-hover"
+									}`}
+								>
+									{esSeleccionado && (
+										<span
+											aria-hidden="true"
+											className="absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full bg-accent"
+										/>
+									)}
+									<span className="text-sm font-medium flex-1 truncate text-primary">
+										{e.nombre_estado}
+									</span>
+									<span className="font-mono text-[11px] text-tertiary tabular-nums">
+										{m.search_cartel_count(
+											{ count: e.carteles.length },
+											{ locale },
+										)}
+									</span>
+								</button>
+							);
+						})}
+					</div>
+				</section>
+			)}
+
+			{carteles.length > 0 && (
+				<section className="flex flex-col gap-2">
+					<h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-tertiary">
+						{m.search_cartels({ count: carteles.length }, { locale })}
+					</h3>
+					<div className="flex flex-col gap-0.5">
+						{carteles.map((cartel) => {
+							const esSeleccionado =
+								cartelSeleccionado === cartel.slug ||
+								cartelSeleccionado === cartel.id;
+							return (
+								<button
+									type="button"
+									key={cartel.id}
+									onClick={() => seleccionarCartel(cartel)}
+									className={`relative flex items-center gap-3 px-2.5 min-h-11 rounded-lg transition-colors text-left w-full ${
+										esSeleccionado ? "bg-elevated" : "hover:bg-hover"
+									}`}
+								>
+									{esSeleccionado && (
+										<span
+											aria-hidden="true"
+											className="absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full bg-accent"
+										/>
+									)}
+									<span
+										className="w-2.5 h-2.5 rounded-full shrink-0"
+										style={{ backgroundColor: cartel.color }}
+									/>
+									<span className="text-sm font-medium flex-1 truncate text-primary">
+										{cartel.nombre}
+									</span>
+									<span className="font-mono text-[11px] text-tertiary tabular-nums">
+										{m.search_presence(
+											{ count: contarPresencia(cartel) },
+											{ locale },
+										)}
+									</span>
+								</button>
+							);
+						})}
+					</div>
+				</section>
+			)}
 		</div>
 	);
 };

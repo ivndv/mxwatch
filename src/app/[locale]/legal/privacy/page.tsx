@@ -52,22 +52,24 @@ export default async function PrivacyPage({
 	];
 
 	return (
-		<article className="max-w-3xl mx-auto px-4 py-20 text-secondary leading-relaxed">
-			<h1 className="text-3xl font-bold text-primary mb-2">
+		<article className="max-w-3xl mx-auto px-4 py-16 sm:py-20 text-secondary leading-relaxed">
+			<h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-primary mb-2">
 				{m.privacy_title({}, { locale: l })}
 			</h1>
-			<p className="text-sm text-accent font-medium mb-12 uppercase tracking-widest">
+			<p className="text-xs font-mono text-tertiary mb-10">
 				{m.legal_updated({}, { locale: l })}
 			</p>
 
 			{secciones.map(({ titulo, cuerpo }) => (
-				<section key={titulo} className="mb-10">
-					<h2 className="text-xl font-bold text-primary mb-4">{titulo}</h2>
-					<p>{cuerpo}</p>
+				<section key={titulo} className="mb-9">
+					<h2 className="text-lg font-semibold tracking-tight text-primary mb-2.5">
+						{titulo}
+					</h2>
+					<p className="text-[15px] leading-relaxed">{cuerpo}</p>
 				</section>
 			))}
 
-			<div className="mt-20 pt-8 border-t border-border text-center">
+			<div className="mt-20 pt-8 border-t border-border-subtle text-center">
 				<p className="text-sm">{m.privacy_footer({}, { locale: l })}</p>
 			</div>
 		</article>

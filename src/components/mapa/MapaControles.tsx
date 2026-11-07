@@ -25,7 +25,7 @@ const MapaControles = React.memo(
 					type="button"
 					onClick={onZoomIn}
 					disabled={zoom >= MAX_ZOOM}
-					className="w-9 h-9 rounded-md bg-card border border-border hover:bg-hover transition-all disabled:opacity-30 flex items-center justify-center text-base"
+					className="w-11 h-11 rounded-xl bg-card/90 backdrop-blur-md border border-border-subtle shadow-float text-secondary hover:bg-hover hover:text-primary transition-colors disabled:opacity-30 flex items-center justify-center text-base"
 					aria-label={m.map_zoom_in({}, { locale })}
 				>
 					+
@@ -34,7 +34,7 @@ const MapaControles = React.memo(
 					type="button"
 					onClick={onZoomOut}
 					disabled={zoom <= DEFAULT_ZOOM}
-					className="w-9 h-9 rounded-md bg-card border border-border hover:bg-hover transition-all disabled:opacity-30 flex items-center justify-center text-base"
+					className="w-11 h-11 rounded-xl bg-card/90 backdrop-blur-md border border-border-subtle shadow-float text-secondary hover:bg-hover hover:text-primary transition-colors disabled:opacity-30 flex items-center justify-center text-base"
 					aria-label={m.map_zoom_out({}, { locale })}
 				>
 					-
@@ -42,7 +42,7 @@ const MapaControles = React.memo(
 				<button
 					type="button"
 					onClick={onReset}
-					className="w-9 h-9 rounded-md bg-card border border-border text-accent hover:bg-accent/10 transition-all flex items-center justify-center"
+					className="w-11 h-11 rounded-xl bg-card/90 backdrop-blur-md border border-border-subtle shadow-float text-secondary hover:bg-hover hover:text-accent transition-colors flex items-center justify-center"
 					aria-label={m.map_reset({}, { locale })}
 				>
 					⟲
@@ -59,7 +59,7 @@ export default MapaControles;
 export const IndicadorAtajos = () => {
 	const locale = useLocale();
 	return (
-		<div className="absolute bottom-6 left-6 z-30 bg-card border border-border-subtle rounded-md px-3 py-2 text-[11px] font-mono text-tertiary hidden md:block">
+		<div className="absolute bottom-6 left-6 z-30 bg-card/90 backdrop-blur-md border border-border-subtle rounded-full px-3.5 py-2 text-[11px] font-mono text-tertiary hidden md:block shadow-float">
 			<div className="flex items-center gap-3">
 				<span>{m.map_shortcut_zoom({}, { locale })}</span>
 				<span>{m.map_shortcut_reset({}, { locale })}</span>

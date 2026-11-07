@@ -9,24 +9,26 @@ const TooltipEstrategico = React.memo(
 		const locale = useLocale();
 		return (
 			<div
-				className="absolute z-50 pointer-events-none transition-transform duration-75 ease-out"
-				style={{ left: tooltip.x + 15, top: tooltip.y + 15 }}
+				className="absolute left-0 top-0 z-50 pointer-events-none"
+				style={{
+					transform: `translate3d(${tooltip.x + 15}px, ${tooltip.y + 15}px, 0)`,
+				}}
 			>
-				<div className="bg-tooltip/95 backdrop-blur-md border border-border rounded-md p-2.5 shadow-2xl flex flex-col gap-1.5 min-w-[160px]">
-					<span className="text-[11px] font-bold uppercase tracking-wide text-tertiary">
+				<div className="bg-tooltip/95 backdrop-blur-md border border-border-subtle rounded-lg p-3 shadow-float flex flex-col gap-2 min-w-[160px]">
+					<span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-tertiary">
 						{m.map_tooltip_state({}, { locale })}
 					</span>
-					<span className="text-sm font-bold text-primary">
+					<span className="text-sm font-semibold text-primary">
 						{tooltip.content}
 					</span>
-					<div className="h-[1px] w-full bg-elevated my-0.5" />
+					<div className="h-px w-full bg-border-subtle" />
 					<div className="flex items-center gap-2">
-						<div
-							className="w-2.5 h-2.5 rounded-[3px] flex-shrink-0"
+						<span
+							className="w-2.5 h-2.5 rounded-full flex-shrink-0"
 							style={{ backgroundColor: tooltip.color }}
 						/>
 						<span
-							className="text-xs font-mono font-bold"
+							className="text-xs font-mono font-medium"
 							style={{ color: tooltip.color }}
 						>
 							{tooltip.cartel}

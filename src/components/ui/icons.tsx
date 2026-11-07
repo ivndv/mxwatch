@@ -21,7 +21,7 @@ export const ClearButton = ({ onClick }: { onClick: () => void }) => (
 	<button
 		type="button"
 		onClick={onClick}
-		className="absolute right-3 top-1/2 -translate-y-1/2 text-tertiary hover:text-primary transition-colors p-0.5"
+		className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-11 min-h-11 text-tertiary hover:text-primary transition-colors"
 		aria-label="Limpiar búsqueda"
 	>
 		<svg

@@ -98,7 +98,7 @@ export default function LanguagePicker() {
 				aria-haspopup="menu"
 				aria-expanded={abierto}
 				aria-label={m.nav_language({}, { locale })}
-				className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated px-2 text-secondary transition-colors hover:bg-hover hover:text-primary"
+				className="inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-secondary transition-colors hover:bg-hover hover:text-primary"
 			>
 				<GloboIcono />
 				<span className="hidden sm:inline text-xs font-semibold tracking-wide">
@@ -111,7 +111,7 @@ export default function LanguagePicker() {
 				<div
 					role="menu"
 					aria-label={m.nav_language({}, { locale })}
-					className="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-border bg-card p-1 shadow-lg"
+					className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-border-subtle bg-card p-1.5 shadow-float"
 				>
 					{IDIOMAS.map(({ valor, nombre }) => {
 						const activo = valor === locale;
@@ -123,7 +123,7 @@ export default function LanguagePicker() {
 								aria-checked={activo}
 								onClick={() => setAbierto(false)}
 								className={`
-									flex h-8 items-center justify-between rounded-md px-2 text-xs transition-colors
+									flex h-9 items-center justify-between rounded-lg px-2.5 text-[13px] transition-colors
 									${activo ? "bg-hover text-primary" : "text-secondary hover:bg-hover hover:text-primary"}
 								`}
 							>

@@ -1,31 +1,29 @@
 // biome-ignore-all lint/security/noDangerouslySetInnerHtml: tema y JSON-LD son contenido controlado
 
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import "../globals.css";
 
+import Providers from "@/app/providers";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
-import ThemeSync from "@/components/layout/ThemeSync";
 import LocaleProvider from "@/i18n/LocaleProvider";
 // Traducciones y locale de la ruta
 import * as m from "@/paraglide/messages";
 import { isLocale, locales } from "@/paraglide/runtime";
 
-// Tipografía institucional: legible en tablas y paneles densos
-const plexSans = IBM_Plex_Sans({
-	variable: "--font-plex-sans",
-	weight: ["400", "500", "600", "700"],
+// Tipografía principal: Geist Sans (base Vercel)
+const geistSans = Geist({
+	variable: "--font-geist-sans",
 	subsets: ["latin"],
 	display: "swap",
 });
 
-// Tipografía monoespaciada para cifras, versiones y atajos
-const plexMono = IBM_Plex_Mono({
-	variable: "--font-plex-mono",
-	weight: ["400", "500", "600"],
+// Tipografía monoespaciada para cifras, fechas y coordenadas
+const geistMono = Geist_Mono({
+	variable: "--font-geist-mono",
 	subsets: ["latin"],
 	display: "swap",
 });
@@ -126,13 +124,6 @@ export default async function LocaleLayout({
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
-				{/* Aplica el tema antes del primer pintado para evitar el flash */}
-				<script
-					dangerouslySetInnerHTML={{
-						__html: `(function(){try{var raw=localStorage.getItem("mxwatch-theme");var tema=raw?JSON.parse(raw).state.tema:"dark";var resuelto=tema==="system"?(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):tema;document.documentElement.dataset.theme=resuelto;}catch(e){document.documentElement.dataset.theme="dark";}})();`,
-					}}
-				/>
-
 				<script
 					type="application/ld+json"
 					dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -146,23 +137,27 @@ export default async function LocaleLayout({
 				/>
 			</head>
 			<body
-				className={`${plexSans.variable} ${plexMono.variable} antialiased flex flex-col min-h-dvh`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-dvh`}
 			>
-				<LocaleProvider locale={locale}>
-					<a
-						href="#main-content"
-						className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-card focus:text-primary focus:rounded-lg focus:border focus:border-border focus:shadow-2xl"
-					>
-						{m.a11y_skip({}, { locale })}
-					</a>
-					<ThemeSync />
-					<Navbar />
-					{/* Contenedor principal con offset para navbar fijo */}
-					<main id="main-content" className="flex-1 w-full pt-[64px]">
-						{children}
-					</main>
-					<Footer />
-				</LocaleProvider>
+				<Providers>
+					<LocaleProvider locale={locale}>
+						<a
+							href="#main-content"
+							className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-card focus:text-primary focus:rounded-lg focus:border focus:border-border focus:shadow-float"
+						>
+							{m.a11y_skip({}, { locale })}
+						</a>
+						<Navbar />
+						{/* Contenedor principal con offset para navbar fijo */}
+						<main
+							id="main-content"
+							className="flex-1 w-full pt-[calc(64px+env(safe-area-inset-top))]"
+						>
+							{children}
+						</main>
+						<Footer />
+					</LocaleProvider>
+				</Providers>
 				<Script
 					src="https://static.cloudflareinsights.com/beacon.min.js"
 					data-cf-beacon='{"token":"d6746ded70f946509cb9e045788037e7"}'

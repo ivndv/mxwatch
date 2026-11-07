@@ -7,11 +7,13 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import * as m from "@/paraglide/messages";
 import { localizeHref } from "@/paraglide/runtime";
 import LanguagePicker from "./LanguagePicker";
+import MobileMenu from "./MobileMenu";
 import ThemeToggle from "./ThemeToggle";
 
 /**
  * Barra de navegación principal fija.
- * Logo a la izquierda, enlaces al centro y controles a la derecha.
+ * En escritorio: logo, enlaces y controles.
+ * En móvil: logo y menú hamburguesa con enlaces y ajustes.
  */
 export default function Navbar() {
 	const locale = useLocale();
@@ -29,15 +31,15 @@ export default function Navbar() {
 	};
 
 	return (
-		<header className="fixed top-0 left-0 right-0 z-50 h-[64px] border-b border-border bg-surface/60 backdrop-blur-md pt-[env(safe-area-inset-top)]">
+		<header className="fixed top-0 left-0 right-0 z-50 h-[calc(64px+env(safe-area-inset-top))] border-b border-border-subtle bg-surface/80 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
 			<nav
-				className="w-full max-w-6xl mx-auto h-full px-4 sm:px-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3"
-				aria-label="Navegación principal"
+				className="w-full max-w-6xl mx-auto h-full px-4 sm:px-6 grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center gap-3"
+				aria-label={m.nav_section({}, { locale })}
 			>
 				{/* Identidad de marca */}
 				<Link
 					href={localizeHref("/", { locale })}
-					className="justify-self-start flex items-center gap-2.5 select-none transition-opacity hover:opacity-90"
+					className="justify-self-start flex items-center gap-2.5 min-h-11 min-w-11 select-none transition-opacity hover:opacity-80"
 					aria-label="mxwatch — home"
 				>
 					<Image
@@ -45,15 +47,15 @@ export default function Navbar() {
 						alt="MxWatch Logo"
 						width={30}
 						height={30}
-						className="w-7 h-7 rounded-md shadow-[0_0_15px_rgba(230,57,70,0.25)]"
+						className="w-7 h-7 rounded-lg"
 					/>
-					<span className="font-display text-lg font-bold tracking-tight text-primary">
+					<span className="font-semibold text-[15px] tracking-tight text-primary max-[379px]:hidden">
 						mxwatch
 					</span>
 				</Link>
 
-				{/* Enlaces con estado activo */}
-				<ul className="justify-self-center flex items-center gap-1">
+				{/* Enlaces con estado activo (escritorio) */}
+				<ul className="hidden md:flex justify-self-center items-center gap-1">
 					{enlaces.map(({ href, label }) => {
 						const activo = estaActivo(href);
 						return (
@@ -62,15 +64,15 @@ export default function Navbar() {
 									href={localizeHref(href, { locale })}
 									aria-current={activo ? "page" : undefined}
 									className={`
-										relative inline-flex rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-										${activo ? "text-primary" : "text-secondary hover:text-primary"}
+										relative inline-flex items-center min-h-11 rounded-full px-4 text-[13px] font-medium transition-colors
+										${activo ? "text-primary" : "text-secondary hover:bg-hover hover:text-primary"}
 									`}
 								>
 									{label}
 									{activo && (
 										<span
 											aria-hidden="true"
-											className="absolute inset-x-3 -bottom-px h-px bg-accent"
+											className="absolute inset-x-4 -bottom-[9px] h-0.5 rounded-full bg-accent"
 										/>
 									)}
 								</Link>
@@ -79,11 +81,14 @@ export default function Navbar() {
 					})}
 				</ul>
 
-				{/* Controles de idioma y tema */}
-				<div className="justify-self-end flex items-center gap-2">
+				{/* Controles de idioma y tema (escritorio) */}
+				<div className="justify-self-end hidden md:flex items-center gap-1">
 					<LanguagePicker />
 					<ThemeToggle />
 				</div>
+
+				{/* Menú hamburguesa (móvil): navegación y ajustes */}
+				<MobileMenu />
 			</nav>
 		</header>
 	);

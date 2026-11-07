@@ -1,6 +1,6 @@
 import { Mercator } from "@visx/geo";
 import type { Feature, Geometry } from "geojson";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { MAP_VIEW_HEIGHT, MAP_VIEW_WIDTH } from "@/lib/useMapView";
 import type {
 	CartelStyle,
@@ -59,7 +59,7 @@ const MapaLayer = React.memo(function MapaLayer({
 	features,
 	getCartelStyle,
 	selectedState,
-	setSelectedState,
+	onSelectState,
 	setTooltip,
 	didDragRef,
 	mapScale,
@@ -68,12 +68,25 @@ const MapaLayer = React.memo(function MapaLayer({
 	features: Feature<Geometry>[];
 	getCartelStyle: (nombreEstado: string) => CartelStyle;
 	selectedState: string | null;
-	setSelectedState: (state: string | null) => void;
+	onSelectState: (state: string | null) => void;
 	setTooltip: React.Dispatch<React.SetStateAction<TooltipState | null>>;
 	didDragRef: { current: boolean };
 	mapScale: number;
 	containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
+	// Rect del contenedor cacheado mientras el hover está activo
+	const rectRef = useRef<DOMRect | null>(null);
+	// Frame pendiente para mover el tooltip como máximo una vez por frame
+	const moveRafRef = useRef<number | null>(null);
+	const pendingMoveRef = useRef<{ x: number; y: number } | null>(null);
+
+	useEffect(
+		() => () => {
+			if (moveRafRef.current != null) cancelAnimationFrame(moveRafRef.current);
+		},
+		[],
+	);
+
 	// Tooltip al hover (se omite al arrastrar)
 	const handleMouseEnter = useCallback(
 		(
@@ -82,8 +95,9 @@ const MapaLayer = React.memo(function MapaLayer({
 			style: CartelStyle,
 		) => {
 			if (didDragRef.current || !containerRef.current) return;
-			// Posición del tooltip relativa al contenedor
-			const rect = containerRef.current.getBoundingClientRect();
+			// Cachea el rect del contenedor para no medirlo en cada mousemove
+			rectRef.current = containerRef.current.getBoundingClientRect();
+			const rect = rectRef.current;
 			const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
 			const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 			setTooltip({
@@ -101,30 +115,48 @@ const MapaLayer = React.memo(function MapaLayer({
 		[containerRef, setTooltip, didDragRef],
 	);
 
-	// Actualiza la posición del tooltip (se omite al arrastrar)
+	// Actualiza la posición del tooltip como máximo una vez por frame
 	const handleMouseMove = useCallback(
 		(e: React.MouseEvent | React.TouchEvent) => {
 			if (didDragRef.current || !containerRef.current) return;
-			const rect = containerRef.current.getBoundingClientRect();
+			const rect =
+				rectRef.current ?? containerRef.current.getBoundingClientRect();
 			const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
 			const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-			// Conserva el contenido; solo mueve la posición
-			setTooltip((prev) =>
-				prev
-					? { ...prev, x: clientX - rect.left, y: clientY - rect.top }
-					: null,
-			);
+			pendingMoveRef.current = {
+				x: clientX - rect.left,
+				y: clientY - rect.top,
+			};
+
+			if (moveRafRef.current == null) {
+				moveRafRef.current = requestAnimationFrame(() => {
+					moveRafRef.current = null;
+					const pendiente = pendingMoveRef.current;
+					if (!pendiente) return;
+					// Conserva el contenido; solo mueve la posición
+					setTooltip((prev) =>
+						prev ? { ...prev, x: pendiente.x, y: pendiente.y } : null,
+					);
+				});
+			}
 		},
 		[containerRef, setTooltip, didDragRef],
 	);
+
+	// Limpia el rect cacheado y el tooltip al salir
+	const handleMouseLeave = useCallback(() => {
+		rectRef.current = null;
+		pendingMoveRef.current = null;
+		setTooltip(null);
+	}, [setTooltip]);
 
 	// Alterna la selección (se omite si fue arrastre)
 	const handleSelect = useCallback(
 		(nombreEstado: string) => {
 			if (didDragRef.current) return;
-			setSelectedState(selectedState === nombreEstado ? null : nombreEstado);
+			onSelectState(selectedState === nombreEstado ? null : nombreEstado);
 		},
-		[didDragRef, selectedState, setSelectedState],
+		[didDragRef, selectedState, onSelectState],
 	);
 
 	return (
@@ -134,48 +166,73 @@ const MapaLayer = React.memo(function MapaLayer({
 			translate={VIEW_TRANSLATE}
 			scale={mapScale}
 		>
-			{({ features: geos }) =>
-				geos.map(({ feature, path, index }) => {
-					const nombreEstado =
-						(feature.properties?.state_name as string | undefined) ?? "";
-					const style = getCartelStyle(nombreEstado);
-					return (
-						<path
-							key={`geo-${index}`}
-							d={path ?? ""}
-							fill={style.fill}
-							stroke={style.stroke}
-							strokeWidth={style.strokeWidth}
-							tabIndex={0}
-							role="button"
-							aria-label={nombreEstado}
-							onMouseEnter={(e) => handleMouseEnter(e, nombreEstado, style)}
-							onMouseMove={handleMouseMove}
-							// Oculta el tooltip al salir
-							onMouseLeave={() => setTooltip(null)}
-							onTouchStart={(e) => handleMouseEnter(e, nombreEstado, style)}
-							onTouchMove={handleMouseMove}
-							// Oculta el tooltip 1.5s tras soltar el toque
-							onTouchEnd={() => setTimeout(() => setTooltip(null), 1500)}
-							// Selecciona al hacer clic
-							onClick={() => handleSelect(nombreEstado)}
-							// Selecciona con Enter o Espacio (a11y)
-							onKeyDown={(e) => {
-								if (e.key === "Enter" || e.key === " ") {
-									e.preventDefault();
-									handleSelect(nombreEstado);
-								}
-							}}
-							style={{
-								opacity: style.opacity,
-								outline: "none",
-								transition: "all 200ms ease",
-							}}
-							className="mapa-geography focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-						/>
-					);
-				})
-			}
+			{({ features: geos }) => {
+				const seleccionado = selectedState
+					? geos.find(
+							({ feature }) =>
+								(feature.properties?.state_name as string | undefined) ===
+								selectedState,
+						)
+					: undefined;
+
+				return (
+					<>
+						{geos.map(({ feature, path, index }) => {
+							const nombreEstado =
+								(feature.properties?.state_name as string | undefined) ?? "";
+							const style = getCartelStyle(nombreEstado);
+							return (
+								<path
+									key={`geo-${index}`}
+									d={path ?? ""}
+									fill={style.fill}
+									stroke={style.stroke}
+									strokeWidth={style.strokeWidth}
+									tabIndex={0}
+									role="button"
+									aria-label={nombreEstado}
+									onMouseEnter={(e) => handleMouseEnter(e, nombreEstado, style)}
+									onMouseMove={handleMouseMove}
+									// Oculta el tooltip al salir
+									onMouseLeave={handleMouseLeave}
+									onTouchStart={(e) => handleMouseEnter(e, nombreEstado, style)}
+									onTouchMove={handleMouseMove}
+									// Oculta el tooltip 1.5s tras soltar el toque
+									onTouchEnd={() => setTimeout(() => setTooltip(null), 1500)}
+									// Selecciona al hacer clic
+									onClick={() => handleSelect(nombreEstado)}
+									// Selecciona con Enter o Espacio (a11y)
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											handleSelect(nombreEstado);
+										}
+									}}
+									style={{
+										opacity: style.opacity,
+										outline: "none",
+										transition:
+											"fill 200ms ease, stroke 200ms ease, opacity 200ms ease",
+									}}
+									className="mapa-geography focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+								/>
+							);
+						})}
+						{seleccionado && (
+							<path
+								d={seleccionado.path ?? ""}
+								fill="none"
+								stroke="var(--map-highlight)"
+								strokeWidth={2.5}
+								vectorEffect="non-scaling-stroke"
+								pointerEvents="none"
+								strokeLinejoin="round"
+								focusable="false"
+							/>
+						)}
+					</>
+				);
+			}}
 		</Mercator>
 	);
 });
@@ -190,9 +247,10 @@ const MapaRenderizado = React.memo(
 		onPointerDown,
 		getCartelStyle,
 		selectedState,
-		setSelectedState,
+		onSelectState,
 		setTooltip,
 		mapScale,
+		preserveAspectRatio,
 		containerRef,
 		patronesDefs,
 	}: MapaMemoizadoProps) => {
@@ -201,9 +259,10 @@ const MapaRenderizado = React.memo(
 				<svg
 					ref={svgRef}
 					viewBox={`0 0 ${MAP_VIEW_WIDTH} ${MAP_VIEW_HEIGHT}`}
+					preserveAspectRatio={preserveAspectRatio}
 					className="w-full h-full"
 					role="img"
-					aria-label="Mapa de México con control territorial de cárteles"
+					aria-label="Mapa de México con control territorial de organizaciones criminales"
 					style={{ touchAction: "none" }}
 					onPointerDown={onPointerDown}
 				>
@@ -215,7 +274,7 @@ const MapaRenderizado = React.memo(
 							features={features}
 							getCartelStyle={getCartelStyle}
 							selectedState={selectedState}
-							setSelectedState={setSelectedState}
+							onSelectState={onSelectState}
 							setTooltip={setTooltip}
 							didDragRef={didDragRef}
 							mapScale={mapScale}

@@ -2,29 +2,34 @@
 
 import type { FeatureCollection } from "geojson";
 // React y hooks
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	useCallback,
+	useDeferredValue,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 // TopoJSON y GeoJSON
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
-// Server actions
-import { obtenerDatosMapa } from "@/actions/mapData";
 // Utilerías y cálculos de estilo del mapa
 import {
 	calcularEstiloCartel,
+	clasificarBusqueda,
 	ESTILO_SIN_DATOS,
 	generarIdPatron,
 	obtenerColoresOrdenados,
 } from "@/lib/mapa";
+// Estado del servidor (TanStack Query)
+import { usePresencia } from "@/lib/useMapaQueries";
 // Pan/zoom nativo del mapa
 import { useMapView } from "@/lib/useMapView";
-// Store (Zustand)
+// Store de UI (Zustand)
 import {
 	useAccionesMapa,
 	useBusqueda,
-	useCargandoDatosPresencia,
 	useCartelSeleccionado,
-	useDatosPresencia,
-	useErrorDatosPresencia,
 	useEstadoSeleccionado,
 } from "@/store/mapStore";
 import type { CartelStyle, PatronDef, TooltipState } from "@/types/mapa";
@@ -45,19 +50,24 @@ const geoUrl = "https://assets.liuma.app/mxwatch/maps/mexico.json";
  * Núcleo interactivo del mapa: renderiza geografía, gestiona zoom y visualiza control territorial.
  */
 export default function MapCanvas() {
-	// Estado Global (Zustand)
+	// Estado de UI (Zustand)
 	const cartelSeleccionado = useCartelSeleccionado();
 	const estadoSeleccionado = useEstadoSeleccionado();
-	const datosPresencia = useDatosPresencia();
 	const busqueda = useBusqueda();
+	const busquedaDiferida = useDeferredValue(busqueda);
 	const {
+		establecerBusqueda,
+		establecerCartelSeleccionado,
 		establecerEstadoSeleccionado,
-		establecerDatosPresencia,
-		establecerCargandoDatosPresencia,
-		establecerErrorDatosPresencia,
 	} = useAccionesMapa();
-	const cargandoDatosPresencia = useCargandoDatosPresencia();
-	const errorDatosPresencia = useErrorDatosPresencia();
+
+	// Estado del servidor (TanStack Query)
+	const {
+		data: datosPresencia = [],
+		isLoading: cargandoDatosPresencia,
+		error: errorPresencia,
+	} = usePresencia();
+	const errorDatosPresencia = errorPresencia ? "Error inteligencia" : null;
 
 	// Estado Local: Vista, datos crudos y UI
 	const [topoData, setTopoData] = useState<Topology | null>(null);
@@ -71,11 +81,10 @@ export default function MapCanvas() {
 	const { view, zoomIn, zoomOut, reset, didDragRef, svgRef, onPointerDown } =
 		useMapView();
 
-	// Carga asíncrona de geometría (TopoJSON) e inteligencia (DB) con AbortController
+	// Carga asíncrona de la geometría (TopoJSON) con AbortController
 	useEffect(() => {
 		const controller = new AbortController();
 
-		// 1. Carga de Geometría
 		setCargandoMapa(true);
 		fetch(geoUrl, { signal: controller.signal })
 			// Valida que la respuesta HTTP sea exitosa
@@ -93,25 +102,24 @@ export default function MapCanvas() {
 			// Quita el indicador de carga
 			.finally(() => setCargandoMapa(false));
 
-		// 2. Carga de Inteligencia en Vivo
-		establecerCargandoDatosPresencia(true);
-		obtenerDatosMapa()
-			// Almacena los datos de presencia
-			.then((data) => {
-				establecerDatosPresencia(data);
-				establecerErrorDatosPresencia(null);
-			})
-			// Error de conexión con el servidor
-			.catch(() => establecerErrorDatosPresencia("Error inteligencia"))
-			// Quita el indicador de carga
-			.finally(() => establecerCargandoDatosPresencia(false));
-
 		return () => controller.abort();
-	}, [
-		establecerDatosPresencia,
-		establecerCargandoDatosPresencia,
-		establecerErrorDatosPresencia,
-	]);
+	}, []);
+
+	// Selecciona un estado y limpia la búsqueda y el cártel activo
+	const seleccionarEstado = useCallback(
+		(nombreEstado: string | null) => {
+			establecerEstadoSeleccionado(nombreEstado);
+			if (nombreEstado) {
+				establecerCartelSeleccionado(null);
+				establecerBusqueda("");
+			}
+		},
+		[
+			establecerEstadoSeleccionado,
+			establecerCartelSeleccionado,
+			establecerBusqueda,
+		],
+	);
 
 	// Limpia la selección de estado
 	const handleClearSelection = useCallback(
@@ -153,6 +161,12 @@ export default function MapCanvas() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [zoomIn, zoomOut, reset, handleClearSelection]);
 
+	// Clasifica la búsqueda: estados primero, cárteles después
+	const busquedaClasificada = useMemo(
+		() => clasificarBusqueda(datosPresencia, busquedaDiferida),
+		[datosPresencia, busquedaDiferida],
+	);
+
 	// Estilos por estado precargados (lookup O(1) en el render)
 	const estilosPorEstado = useMemo(() => {
 		const mapa = new Map<string, CartelStyle>();
@@ -161,14 +175,15 @@ export default function MapCanvas() {
 				estado.nombre_estado,
 				calcularEstiloCartel(
 					estado.nombre_estado,
-					datosPresencia,
+					estado,
 					cartelSeleccionado,
-					busqueda,
+					busquedaClasificada.modo,
+					busquedaClasificada.consulta,
 				),
 			);
 		}
 		return mapa;
-	}, [datosPresencia, cartelSeleccionado, busqueda]);
+	}, [datosPresencia, cartelSeleccionado, busquedaClasificada]);
 
 	// Estilo de un estado por nombre
 	const getCartelStyle = useCallback(
@@ -193,11 +208,29 @@ export default function MapCanvas() {
 	}, [topoData]);
 
 	// Escala adaptativa según dispositivo (Mobile/Desktop)
-	const mapScale = useMemo(
-		() =>
-			typeof window !== "undefined" && window.innerWidth < 768 ? 900 : 1400,
-		[],
+	const [mapScale, setMapScale] = useState(() =>
+		typeof window !== "undefined" &&
+		window.matchMedia("(max-width: 767px)").matches
+			? 900
+			: 1400,
 	);
+	const [esMovil, setEsMovil] = useState(
+		() =>
+			typeof window !== "undefined" &&
+			window.matchMedia("(max-width: 767px)").matches,
+	);
+
+	useEffect(() => {
+		const mq = window.matchMedia("(max-width: 767px)");
+		const actualizar = () => {
+			setMapScale(mq.matches ? 900 : 1400);
+			setEsMovil(mq.matches);
+		};
+
+		actualizar();
+		mq.addEventListener("change", actualizar);
+		return () => mq.removeEventListener("change", actualizar);
+	}, []);
 
 	// Agrupa combinaciones únicas de colores para patrones SVG
 	const patronesDefs = useMemo<PatronDef[]>(() => {
@@ -251,9 +284,10 @@ export default function MapCanvas() {
 							onPointerDown={onPointerDown}
 							getCartelStyle={getCartelStyle}
 							selectedState={estadoSeleccionado}
-							setSelectedState={establecerEstadoSeleccionado}
+							onSelectState={seleccionarEstado}
 							setTooltip={setTooltip}
 							mapScale={mapScale}
+							preserveAspectRatio={esMovil ? "xMidYMid slice" : "xMidYMid meet"}
 							containerRef={mapContainerRef}
 							patronesDefs={patronesDefs}
 						/>

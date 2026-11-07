@@ -1,14 +1,9 @@
 // SEO
 import type { Metadata } from "next";
-// React
-import { Suspense } from "react";
-// Componentes del mapa
-import MapCanvas from "@/components/mapa";
-import MapSidebar from "@/components/sidebar/index";
+// Isla del mapa
+import MapView from "@/components/mapa/MapView";
 import * as m from "@/paraglide/messages";
 import { isLocale } from "@/paraglide/runtime";
-
-export const dynamic = "force-dynamic";
 
 // Metadatos localizados de la vista del mapa
 export async function generateMetadata({
@@ -30,19 +25,8 @@ export async function generateMetadata({
 
 /**
  * Vista principal del mapa interactivo.
- * Compone el lienzo geográfico (MapCanvas) y el panel de inteligencia (MapSidebar).
+ * El shell se prerenderiza y la isla (MapView) se monta en el cliente.
  */
 export default function MapaPage() {
-	return (
-		<div className="flex flex-col md:flex-row h-[calc(100dvh-64px)] w-full overflow-hidden bg-surface">
-			{/* Sidebar lazy con skeleton en mobile */}
-			<Suspense
-				fallback={<div className="w-full md:w-[348px] bg-card shrink-0" />}
-			>
-				<MapSidebar />
-			</Suspense>
-
-			<MapCanvas />
-		</div>
-	);
+	return <MapView />;
 }

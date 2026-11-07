@@ -30,7 +30,7 @@ Guía operativa y técnica para agentes de IA que colaboran en el desarrollo, ma
 | **Visualización cartográfica** | **@visx/geo** + **d3-geo** + **topojson-client** | `@visx/geo ^4.0.0`, `d3-geo ^3.1.1`, `topojson-client ^3.1.0`; proyección `<Mercator>` y pan/zoom nativo (rueda, arrastre y pinch) en `src/lib/useMapView.ts` |
 | **Estilos & UI** | **Tailwind CSS 4** | `@tailwindcss/postcss ^4.3.3`, `tailwindcss ^4.3.3`, tema claro, oscuro y sistema |
 | **Animaciones & virtualización** | **framer-motion** + **react-window** | `framer-motion ^14.9.0`, `react-window ^2.5.2` |
-| **Estado global** | **Zustand 5** | `zustand ^5.0.16` (stores modulares `mapStore.ts`, `datosSlice.ts`, `mapaSlice.ts`) |
+| **Estado global** | **Zustand 5** + **TanStack Query 5** | Zustand para UI (`mapStore.ts`, `mapaSlice.ts`) y TanStack Query para datos del servidor (`src/lib/useMapaQueries.ts`) |
 | **Validación de datos** | **Zod 4** | `zod ^4.6.7` (validación runtime en `src/schemas/api.ts`) |
 | **Linter & Formatter** | **Biome 2** | `@biomejs/biome ^2.6.4` (`biome.json` con preset `recommended`) |
 | **Infraestructura** | **Cloudflare Workers** + **Wrangler** | `wrangler ^4.156.0` (`wrangler.jsonc`, OpenNext) |
@@ -50,6 +50,7 @@ mxwatch/
 │   ├── actions/                   → Server Actions de Next.js
 │   │   └── mapData.ts             → Fetch server-to-server hacia mxwatch-api con Zod y API_KEY
 │   ├── app/                       → App Router de Next.js
+│   │   ├── providers.tsx          → QueryClientProvider de TanStack Query
 │   │   ├── [locale]/              → Segmento raíz localizado (en, es)
 │   │   │   ├── layout.tsx         → Layout raíz: fuentes, tema, i18n y estructura global
 │   │   │   ├── page.tsx           → Landing
@@ -61,13 +62,13 @@ mxwatch/
 │   │   └── robots.ts & sitemap.ts → SEO y metadatos por idioma
 │   ├── components/
 │   │   ├── layout/                → Navbar, Footer, LanguagePicker, ThemeToggle, ThemeSync, NotFoundContent
-│   │   ├── mapa/                  → index, MapaRenderizado, controles, tooltip y estados de carga
+│   │   ├── mapa/                  → index, MapView (isla cliente), MapaRenderizado, controles, tooltip y estados de carga
 │   │   ├── sidebar/               → Panel de inteligencia (estado, cártel, búsqueda, leyenda)
 │   │   └── ui/                    → Micro-componentes e iconos reutilizables
 │   ├── i18n/                      → LocaleProvider para componentes cliente
-│   ├── lib/                       → parseo de API, estilos del mapa y pan/zoom
+│   ├── lib/                       → parseo de API, queries de TanStack, estilos del mapa y pan/zoom
 │   ├── schemas/                   → Contratos Zod de la API
-│   ├── store/                     → mapStore (datos + mapa) y themeStore
+│   ├── store/                     → mapStore (estado de UI) y themeStore
 │   └── types/                     → Interfaces TypeScript compartidas
 ├── src/proxy.ts                   → Rewrite a /[locale] y resolución de idioma
 ├── open-next.config.ts            → Configuración de OpenNext para Cloudflare
@@ -87,9 +88,11 @@ mxwatch/
                       ▲
                       │  Validación runtime con Zod (api.schemas.ts)
                       ▼
+[ TanStack Query: src/lib/useMapaQueries.ts ]
+         ├── presencia, carteles, inteligencia y detalle
+         └── caché de 5 minutos alineada con el backend
 [ Zustand: src/store/mapStore.ts ]
-         ├── datosSlice: presencia, carteles, detalles
-         └── mapaSlice: estadoSeleccionado, zoom, tooltip
+         └── búsqueda, cártel y estado seleccionados (UI)
                       ▲
                       ▼
 [ Componentes React: src/components/mapa/ & sidebar/ ]
@@ -100,9 +103,15 @@ mxwatch/
    - Consumen los endpoints de la API (`/api/map`, `/api/cartels`, `/api/cartel/:slug`, `/api/state/:name`).
    - Envían el header secreto `x-api-key` configurado en `API_KEY`.
    - Validan cada respuesta contra los esquemas de Zod antes de entregar datos al frontend.
+   - Propagan los errores HTTP/schema para que TanStack Query active `error` y `retry`; un 404 se trata como "sin datos".
 2. **Consumo en cliente:**
-   - La vista `src/app/[locale]/map/page.tsx` hidrata el store de Zustand con los datos validados.
+   - `src/lib/useMapaQueries.ts` expone `usePresencia`, `useCarteles`, `useInteligencia` y `useDetalleCartel`.
+   - TanStack Query cachea las respuestas; Zustand solo guarda búsqueda y selección.
    - `MapaRenderizado.tsx` proyecta el TopoJSON y colorea los estados según su nivel de presencia.
+3. **Renderizado (SSG + isla cliente):**
+   - `src/app/[locale]/map/page.tsx` se prerenderiza en build para `en` y `es`.
+   - `MapView` es una isla cliente: el servidor pinta el skeleton y el mapa se monta tras la hidratación.
+   - Así se evita el mismatch de hidratación y la API no bloquea el HTML si falla.
 
 ## 6. Variables de entorno
 
@@ -155,7 +164,8 @@ bun run lint
 - **Gestor de paquetes exclusivo:** usa siempre **`bun`**. Nunca ejecutes `npm`, `yarn` ni `pnpm`.
 - **Integridad del linter:** ejecuta `bun run lint` o `bun run check` después de modificar archivos para garantizar conformidad con `biome.json`.
 - **Secreto de API:** `API_KEY` es privada del servidor. Las llamadas a `mxwatch-api` pasan por Server Actions; nunca expongas la clave al cliente.
-- **Contratos de datos:** toda respuesta nueva de la API debe validarse con Zod antes de hidratar el store.
+- **Contratos de datos:** toda respuesta nueva de la API debe validarse con Zod antes de entregarla a TanStack Query.
+- **Estado del servidor:** no se copia a Zustand; Zustand solo guarda estado de UI (búsqueda y selección).
 - **Traducciones:** mantén `messages/en.json` y `messages/es.json` completos; CI ejecuta `bun run check:i18n`.
 
 ## 9. Flujo de Git y despliegue
@@ -174,3 +184,13 @@ Flujo: `push`/`PR` a `main`/`develop` → **lint**, **typecheck** y **build** en
 - `typecheck` corre `tsc --noEmit` y `build` compila con Next.js para detectar errores antes de fusionar.
 - `deploy` compila con OpenNext y despliega en Cloudflare (`bun run deploy`).
 - Hardening: `concurrency` (cancela runs obsoletos del mismo ref) y `permissions: contents: read`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

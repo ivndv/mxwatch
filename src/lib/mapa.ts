@@ -11,6 +11,47 @@ export const ESTILO_SIN_DATOS: CartelStyle = {
 	liveDataRaw: null,
 };
 
+// Normaliza texto para buscar sin acentos ni mayúsculas
+export function normalizarTexto(texto: string): string {
+	return texto
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "");
+}
+
+export type ModoBusqueda = "estado" | "cartel" | null;
+
+export interface BusquedaMapa {
+	modo: ModoBusqueda;
+	consulta: string;
+	estados: PresenciaEstado[];
+}
+
+// Clasifica la búsqueda: los estados tienen prioridad sobre los cárteles
+export function clasificarBusqueda(
+	datosPresencia: PresenciaEstado[],
+	consulta: string,
+): BusquedaMapa {
+	const q = normalizarTexto(consulta.trim());
+	if (!q) return { modo: null, consulta: "", estados: [] };
+
+	const porEstado = datosPresencia.filter((estado) =>
+		normalizarTexto(estado.nombre_estado).includes(q),
+	);
+	if (porEstado.length > 0) {
+		return { modo: "estado", consulta: q, estados: porEstado };
+	}
+
+	const porCartel = datosPresencia.filter((estado) =>
+		estado.carteles.some(
+			(cartel) =>
+				normalizarTexto(cartel.nombre).includes(q) ||
+				normalizarTexto(cartel.slug).includes(q),
+		),
+	);
+	return { modo: "cartel", consulta: q, estados: porCartel };
+}
+
 // Ordena los colores de los cárteles alfabéticamente para generar patrones consistentes
 export function obtenerColoresOrdenados(
 	carteles: Array<{ color: string }>,
@@ -26,13 +67,11 @@ export function generarIdPatron(colores: string[]): string {
 // Calcula el estilo visual de un estado según datos de presencia y selección
 export function calcularEstiloCartel(
 	nombreEstado: string,
-	datosPresencia: PresenciaEstado[],
+	registro: PresenciaEstado | undefined,
 	cartelSeleccionado: string | null,
-	busqueda: string,
+	modoBusqueda: ModoBusqueda,
+	consulta: string,
 ): CartelStyle {
-	// Busca el registro de presencia para este estado
-	const registro = datosPresencia.find((s) => s.nombre_estado === nombreEstado);
-
 	// Estado sin datos: color neutro
 	if (!registro || registro.carteles.length === 0) {
 		return ESTILO_SIN_DATOS;
@@ -45,15 +84,16 @@ export function calcularEstiloCartel(
 			(c) => c.slug === cartelSeleccionado || c.id === cartelSeleccionado,
 		);
 	const estaAtenuado = cartelSeleccionado && !hayCoincidencia;
-	const enModoBusqueda = !!busqueda && !cartelSeleccionado;
+	const enModoBusqueda = modoBusqueda !== null && !cartelSeleccionado;
 	const coincideBusqueda =
 		enModoBusqueda &&
-		(nombreEstado.toLowerCase().includes(busqueda.toLowerCase()) ||
-			registro.carteles.some(
-				(c) =>
-					c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-					c.slug.toLowerCase().includes(busqueda.toLowerCase()),
-			));
+		(modoBusqueda === "estado"
+			? normalizarTexto(nombreEstado).includes(consulta)
+			: registro.carteles.some(
+					(c) =>
+						normalizarTexto(c.nombre).includes(consulta) ||
+						normalizarTexto(c.slug).includes(consulta),
+				));
 	const cartelPrincipal = registro.carteles[0];
 	const colorPrincipal = cartelPrincipal.color;
 	const nombresCarteles = registro.carteles.map((c) => c.nombre).join(" / ");

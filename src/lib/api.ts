@@ -14,12 +14,19 @@ export async function parsearRespuesta<T>(
 	res: Response,
 	schema: z.ZodType<T>,
 ): Promise<T | null> {
-	if (!res.ok) return null;
+	// Un 404 significa "sin datos", no un fallo de la API
+	if (res.status === 404) return null;
+
+	// Cualquier otro error HTTP se propaga para que TanStack lo maneje
+	if (!res.ok) throw new Error(`mxwatch-api respondió ${res.status}`);
+
 	const json = await res.json();
 	const parsed = ExitoRespuestaSchema(schema).safeParse(json);
+
 	if (!parsed.success) {
 		console.error("Error de validación API:", parsed.error.issues);
-		return null;
+		throw new Error("Respuesta inválida de mxwatch-api");
 	}
+
 	return parsed.data.datos;
 }

@@ -42,9 +42,10 @@ export interface MapaMemoizadoProps {
 	onPointerDown: React.PointerEventHandler<SVGSVGElement>;
 	getCartelStyle: (nombreEstado: string) => CartelStyle;
 	selectedState: string | null;
-	setSelectedState: (state: string | null) => void;
+	onSelectState: (state: string | null) => void;
 	setTooltip: React.Dispatch<React.SetStateAction<TooltipState | null>>;
 	mapScale: number;
+	preserveAspectRatio?: string;
 	containerRef: React.RefObject<HTMLDivElement | null>;
 	patronesDefs: PatronDef[];
 }

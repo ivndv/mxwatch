@@ -30,7 +30,7 @@ Tablero táctico y mapa interactivo diseñado para consultar, visualizar y monit
 
 - **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS 4
 - **Cartografía & Visualización**: @visx/geo, d3-geo, topojson-client
-- **Estado Global**: Zustand 5
+- **Estado Global**: Zustand 5 (UI) + TanStack Query 5 (datos del servidor)
 - **Validación de Datos**: Zod 4
 - **Internacionalización**: Paraglide JS 2 (español e inglés)
 - **Herramientas & Linter**: Bun, Biome, TypeScript

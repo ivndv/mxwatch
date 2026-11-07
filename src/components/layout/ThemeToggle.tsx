@@ -1,10 +1,13 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import * as m from "@/paraglide/messages";
 import type { Locale } from "@/paraglide/runtime";
-import { type Tema, useThemeStore } from "@/store/themeStore";
+
+// Preferencias posibles: claro, oscuro o sistema
+type Tema = "light" | "dark" | "system";
 
 function SolIcono() {
 	return (
@@ -107,8 +110,8 @@ function etiquetaTema(tema: Tema, locale: Locale): string {
 // Selector de tema con menú: claro, oscuro o sistema
 export default function ThemeToggle() {
 	const locale = useLocale();
-	const tema = useThemeStore((s) => s.tema);
-	const establecerTema = useThemeStore((s) => s.establecerTema);
+	const { theme, setTheme } = useTheme();
+	const tema = (theme ?? "dark") as Tema;
 	const [abierto, setAbierto] = useState(false);
 	const [montado, setMontado] = useState(false);
 	const contenedor = useRef<HTMLDivElement>(null);
@@ -146,7 +149,7 @@ export default function ThemeToggle() {
 				aria-haspopup="menu"
 				aria-expanded={abierto}
 				aria-label={`${m.theme_label({}, { locale })}: ${etiquetaTema(tema, locale)}`}
-				className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated px-2 text-secondary transition-colors hover:bg-hover hover:text-primary"
+				className="inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-secondary transition-colors hover:bg-hover hover:text-primary"
 			>
 				{montado ? <IconoTema tema={tema} /> : <span className="h-4 w-4" />}
 				<ChevronIcono />
@@ -156,7 +159,7 @@ export default function ThemeToggle() {
 				<div
 					role="menu"
 					aria-label={m.theme_label({}, { locale })}
-					className="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-border bg-card p-1 shadow-lg"
+					className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-border-subtle bg-card p-1.5 shadow-float"
 				>
 					{opciones.map((opcion) => {
 						const activo = opcion === tema;
@@ -167,11 +170,11 @@ export default function ThemeToggle() {
 								role="menuitemradio"
 								aria-checked={activo}
 								onClick={() => {
-									establecerTema(opcion);
+									setTheme(opcion);
 									setAbierto(false);
 								}}
 								className={`
-									flex h-8 w-full items-center justify-between rounded-md px-2 text-xs transition-colors
+									flex h-9 w-full items-center justify-between rounded-lg px-2.5 text-[13px] transition-colors
 									${activo ? "bg-hover text-primary" : "text-secondary hover:bg-hover hover:text-primary"}
 								`}
 							>
